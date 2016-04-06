@@ -42,6 +42,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="120dp" />
 
+        <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart_rot_x"
+                android:layout_width="match_parent"
+                android:layout_height="120dp" />
+
+        <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart_rot_y"
+                android:layout_width="match_parent"
+                android:layout_height="120dp" />
+
+        <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart_rot_z"
+                android:layout_width="match_parent"
+                android:layout_height="120dp" />
+
     </LinearLayout>
 
 </ScrollView>

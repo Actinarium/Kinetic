@@ -1,16 +1,11 @@
 package com.actinarium.kinetic;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import com.actinarium.kinetic.components.DataRecorder;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -18,27 +13,20 @@ import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements DataRecorder.Callback {
 
-    private static final long RECORDING_TIME_MILLIS = 2000L;
-    private static final long RECORDING_TIME_NANOS = RECORDING_TIME_MILLIS * 1000000L;
-    private static final int RECORDING_LATENCY_MICROS = 5000;
     private static final float ACCEL_JITTER_THRESHOLD = 0.25f;
 
     private TextView mTimestamp;
     private LineChart mChartX;
     private LineChart mChartY;
     private LineChart mChartZ;
+    private LineChart mChartRotX;
+    private LineChart mChartRotY;
+    private LineChart mChartRotZ;
     private Button mRecordButton;
 
-    private long mRecordingStartTime;
-
-    private float[] mValues = new float[1800];
-    private long[] mTimes = new long[600];
-    private int mValuesLength;
-    private int mTimesLength;
-    private SensorManager mManager;
-    private Sensor mAccelerometerSensor;
+    private DataRecorder mRecorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,77 +38,51 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mChartX = (LineChart) findViewById(R.id.chart_x);
         mChartY = (LineChart) findViewById(R.id.chart_y);
         mChartZ = (LineChart) findViewById(R.id.chart_z);
+        mChartRotX = (LineChart) findViewById(R.id.chart_rot_x);
+        mChartRotY = (LineChart) findViewById(R.id.chart_rot_y);
+        mChartRotZ = (LineChart) findViewById(R.id.chart_rot_z);
+
+        mRecorder = new DataRecorder(this, this, DataRecorder.DEFAULT_RECORDING_TIME_MILLIS, DataRecorder.DEFAULT_SAMPLING_MICROS);
 
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startRecording();
+                mRecordButton.setEnabled(false);
+                mRecorder.start();
             }
         });
-
-        mManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mAccelerometerSensor = mManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        final Sensor rotationVectorSensor = mManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-//        manager.registerListener(mRotationAdapter, rotationVectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-    private void startRecording() {
-        mRecordingStartTime = 0;
-        mValuesLength = 0;
-        mTimesLength = 0;
-        mRecordButton.setEnabled(false);
-        mManager.registerListener(this, mAccelerometerSensor, RECORDING_LATENCY_MICROS);
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                endRecording();
-            }
-        }, RECORDING_TIME_MILLIS);
-    }
-
-    private void endRecording() {
-        mManager.unregisterListener(this, mAccelerometerSensor);
+    @Override
+    public void onDataRecordedResult(@DataRecorder.Status int status, DataRecorder.DataSet accelData,
+                                     DataRecorder.DataSet gyroData, float[] initialOrientation) {
         mRecordButton.setEnabled(true);
-        // draw chart
+        plot(accelData, mChartX, mChartY, mChartZ);
+        plot(gyroData, mChartRotX, mChartRotY, mChartRotZ);
+    }
 
-        ArrayList<Entry> entriesX = new ArrayList<>(mTimesLength);
-        ArrayList<Entry> entriesY = new ArrayList<>(mTimesLength);
-        ArrayList<Entry> entriesZ = new ArrayList<>(mTimesLength);
-        ArrayList<String> dataX = new ArrayList<>(mTimesLength);
+    private void plot(DataRecorder.DataSet dataSet, LineChart chartX, LineChart chartY, LineChart chartZ) {
+        int length = dataSet.timesLength;
+        long startTime = dataSet.times[0];
+
+        ArrayList<Entry> entriesX = new ArrayList<>(length);
+        ArrayList<Entry> entriesY = new ArrayList<>(length);
+        ArrayList<Entry> entriesZ = new ArrayList<>(length);
+        ArrayList<String> dataX = new ArrayList<>(length);
+
         int offset = 0;
-        for (int i = 0; i < mTimesLength; i++) {
-            dataX.add(Double.toString((mTimes[i] - mRecordingStartTime) / 1000000000.0));
-            entriesX.add(new Entry(mValues[offset++], i));
-            entriesY.add(new Entry(mValues[offset++], i));
-            entriesZ.add(new Entry(mValues[offset++], i));
+        for (int i = 0; i < length; i++) {
+            dataX.add(Double.toString((dataSet.times[i] - startTime) / 1000000000.0));
+            entriesX.add(new Entry(dataSet.values[offset++], i));
+            entriesY.add(new Entry(dataSet.values[offset++], i));
+            entriesZ.add(new Entry(dataSet.values[offset++], i));
         }
 
-        mChartX.setData(new LineData(dataX, new LineDataSet(entriesX, null)));
-        mChartY.setData(new LineData(dataX, new LineDataSet(entriesY, null)));
-        mChartZ.setData(new LineData(dataX, new LineDataSet(entriesZ, null)));
-        mChartX.invalidate();
-        mChartY.invalidate();
-        mChartZ.invalidate();
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (mRecordingStartTime == 0) {
-            mRecordingStartTime = event.timestamp;
-        } else if (mTimesLength == 599) {
-            // ignore
-            return;
-        }
-
-        mTimes[mTimesLength++] = event.timestamp;
-        mValues[mValuesLength++] = event.values[0];
-        mValues[mValuesLength++] = event.values[1];
-        mValues[mValuesLength++] = event.values[2];
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // no-op
+        chartX.setData(new LineData(dataX, new LineDataSet(entriesX, null)));
+        chartY.setData(new LineData(dataX, new LineDataSet(entriesY, null)));
+        chartZ.setData(new LineData(dataX, new LineDataSet(entriesZ, null)));
+        chartX.invalidate();
+        chartY.invalidate();
+        chartZ.invalidate();
     }
 }
