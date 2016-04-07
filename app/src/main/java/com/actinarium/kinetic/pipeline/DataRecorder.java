@@ -1,4 +1,4 @@
-package com.actinarium.kinetic.components;
+package com.actinarium.kinetic.pipeline;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.support.annotation.IntDef;
+import com.actinarium.kinetic.util.DataSet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -153,57 +154,6 @@ public class DataRecorder {
          * @param initialOrientation Holds information regarding initial device orientation
          */
         void onDataRecordedResult(@Status int status, DataSet accelData, DataSet gyroData, float[] initialOrientation);
-    }
-
-    /**
-     * A mutable sensor data set backed by two static reusable arrays (values and timestamps) of fixed lengths
-     */
-    public static class DataSet {
-        public float[] values;
-        public long[] times;
-        public int valuesLength;
-        public int timesLength;
-
-        /**
-         * Create a new data set for provided number of sensor events
-         *
-         * @param dataSize The number of sensor events this data set will be able to contain at max
-         */
-        private DataSet(int dataSize) {
-            // Allocate arrays for values and timestamps. We're going to reuse these arrays to avoid memory churn
-            // We're going to use a single-dimensional array to store values for three coordinates
-            values = new float[dataSize * 3];
-            times = new long[dataSize];
-        }
-
-        /**
-         * Resets data end pointer to zero
-         */
-        public void reset() {
-            valuesLength = 0;
-            timesLength = 0;
-        }
-
-        /**
-         * Appends event data (timestamp and 3 values) to this data set
-         *
-         * @param event Sensor event to take data from
-         * @return true if data was added, false if array is overflowing
-         */
-        public boolean put(SensorEvent event) {
-            // Check if we're not overflowing allocated arrays
-            if (timesLength == times.length) {
-                return false;
-            }
-
-            // If everything is OK, save the data
-            times[timesLength++] = event.timestamp;
-            values[valuesLength++] = event.values[0];
-            values[valuesLength++] = event.values[1];
-            values[valuesLength++] = event.values[2];
-
-            return true;
-        }
     }
 
     @Retention(RetentionPolicy.SOURCE)

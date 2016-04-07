@@ -5,7 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import com.actinarium.kinetic.components.DataRecorder;
+import com.actinarium.kinetic.pipeline.DataRecorder;
+import com.actinarium.kinetic.util.DataSet;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -14,8 +15,6 @@ import com.github.mikephil.charting.data.LineDataSet;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements DataRecorder.Callback {
-
-    private static final float ACCEL_JITTER_THRESHOLD = 0.25f;
 
     private TextView mTimestamp;
     private LineChart mChartX;
@@ -54,15 +53,15 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
     }
 
     @Override
-    public void onDataRecordedResult(@DataRecorder.Status int status, DataRecorder.DataSet accelData,
-                                     DataRecorder.DataSet gyroData, float[] initialOrientation) {
+    public void onDataRecordedResult(@DataRecorder.Status int status, DataSet accelData,
+                                     DataSet gyroData, float[] initialOrientation) {
         mRecordButton.setEnabled(true);
         plot(accelData, mChartX, mChartY, mChartZ);
         plot(gyroData, mChartRotX, mChartRotY, mChartRotZ);
     }
 
-    private void plot(DataRecorder.DataSet dataSet, LineChart chartX, LineChart chartY, LineChart chartZ) {
-        int length = dataSet.timesLength;
+    private void plot(DataSet dataSet, LineChart chartX, LineChart chartY, LineChart chartZ) {
+        int length = dataSet.length;
         long startTime = dataSet.times[0];
 
         ArrayList<Entry> entriesX = new ArrayList<>(length);
