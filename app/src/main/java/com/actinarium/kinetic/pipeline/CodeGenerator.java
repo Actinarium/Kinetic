@@ -1,7 +1,5 @@
 package com.actinarium.kinetic.pipeline;
 
-import com.actinarium.kinetic.util.DataSet;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -14,28 +12,28 @@ import java.util.Locale;
 public class CodeGenerator {
 
     /**
-     * Template for a resulting table lookup interpolator. The parameters are: <ol> <li>Package name</li> <li>Natural
-     * name</li> <li>Class name</li> <li>Float values, delimited with a comma, optionally split into rows of 6</li>
-     * </ol>
+     * Template for a resulting table lookup interpolator. The parameters are: <ol> <li>Package name</li> <li>Class
+     * name</li> <li>Float values, delimited with a comma, optionally split into rows of 6</li> </ol>
      */
     private static final String TABLE_LOOKUP_TEMPLATE = "package %1$s;"
             + "\n"
             + "\nimport android.view.animation.Interpolator;"
             + "\n"
             + "\n/**"
-            + "\n * <p>%2$s. Uses lookup table sampled at regular intervals and interpolates linearly between lookup table values.</p>"
+            + "\n * <p>Natural motion interpolator that uses lookup table sampled at regular intervals"
+            + "\n * and interpolates linearly between lookup table values.</p>"
             + "\n *"
-            + "\n * <p> Generated with <a href=\"https://github.com/Actinarium/Kinetic\">Kinetic</a>. Uses the code from Android"
-            + "\n * Support v4 Library {@link android.support.v4.view.animation.LookupTableInterpolator LookupTableInterpolator} licensed"
-            + "\n * under Apache 2.0 License.</p>"
+            + "\n * <p>Generated with <a href=\"https://github.com/Actinarium/Kinetic\">Kinetic</a>."
+            + "\n * Derives from Apache 2.0 licensed code from Android Support v4 Library, specifically"
+            + "\n * {@link android.support.v4.view.animation.LookupTableInterpolator LookupTableInterpolator}</p>"
             + "\n */"
-            + "\npublic class %3$s implements Interpolator {"
+            + "\npublic class %2$s implements Interpolator {"
             + "\n"
             + "\n    /**"
             + "\n     * Lookup table values sampled with x at regular intervals between 0 and 1"
             + "\n     */"
             + "\n    private static final float[] VALUES = new float[]{"
-            + "\n            %4$s"
+            + "\n            %3$s"
             + "\n    };"
             + "\n    private static final int STEPS = VALUES.length - 1;"
             + "\n    private static final float STEP_SIZE = 1f / STEPS;"
@@ -77,14 +75,20 @@ public class CodeGenerator {
 
     private static final NumberFormat FORMAT = makeFormat();
 
+    /**
+     * Generates Java code for a table lookup interpolator based on provided values
+     *
+     * @param packageName package name to write into the template
+     * @param className   class name to write into the template
+     * @param values      an array of float values that must be recorded at equal intervals
+     * @return generated drop-in Java code
+     */
+    public String generateInterpolatorCode(String packageName, String className, float[] values) {
+        StringBuilder valuesBuilder = new StringBuilder(values.length * CHARS_PER_VALUE);
 
-    public String generateInterpolatorCode(String packageName, String naturalName, String className,
-                                           DataSet dataSet, @DataSet.Offset int offset) {
-        StringBuilder valuesBuilder = new StringBuilder(dataSet.length * CHARS_PER_VALUE);
-        
-        // Append all values but last
-        for (int i = 0, len = dataSet.length - 1; i < len; /* incremented in loop body */) {
-            valuesBuilder.append(FORMAT.format(dataSet.values[i * DataSet.STRIDE + offset])).append('f').append(',');
+        // Append all values but the last one
+        for (int i = 0, len = values.length - 1; i < len; /* incremented in loop body */) {
+            valuesBuilder.append(FORMAT.format(values[i])).append('f').append(',');
             if (++i % VALUES_PER_ROW == 0) {
                 valuesBuilder.append('\n');
             } else {
@@ -92,10 +96,10 @@ public class CodeGenerator {
             }
         }
         // Append last value
-        valuesBuilder.append(FORMAT.format(dataSet.values[(dataSet.length - 1) * DataSet.STRIDE + offset])).append('f');
+        valuesBuilder.append(FORMAT.format(values[values.length - 1])).append('f');
 
         // and generate Java code out of the given template
-        return String.format(TABLE_LOOKUP_TEMPLATE, packageName, naturalName, className, valuesBuilder.toString());
+        return String.format(TABLE_LOOKUP_TEMPLATE, packageName, className, valuesBuilder.toString());
     }
 
     private static NumberFormat makeFormat() {

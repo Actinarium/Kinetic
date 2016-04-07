@@ -1,29 +1,22 @@
 package com.actinarium.kinetic.util;
 
 import android.hardware.SensorEvent;
-import android.support.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
- * A mutable sensor data set backed by two static reusable arrays (values and timestamps) of fixed lengths
+ * A mutable sensor data set backed by four reusable arrays (timestamps and three value sets) of fixed lengths
  */
 public class DataSet {
 
-    /**
-     * Number of values per stride
-     */
-    public static final int STRIDE = 3;
-
-    public static final int OFFSET_X = 0;
-    public static final int OFFSET_Y = 1;
-    public static final int OFFSET_Z = 2;
-
-    public float[] values;
     public long[] times;
+    public float[] valuesX;
+    public float[] valuesY;
+    public float[] valuesZ;
+    /**
+     * Number of fresh values in each of data set arrays, starting from index zero. Values with index equal or greater
+     * than length are stale and should not be used.
+     */
     public int length;
-    private int valuesLength;
+    private int mDataSize;
 
     /**
      * Create a new data set for provided number of sensor events
@@ -31,9 +24,13 @@ public class DataSet {
      * @param dataSize The number of sensor events this data set will be able to contain at max
      */
     public DataSet(int dataSize) {
+        mDataSize = dataSize;
+
         // Allocate arrays for values and timestamps. We're going to reuse these arrays to avoid memory churn
-        // We're going to use a single-dimensional array to store values for three coordinates
-        values = new float[dataSize * STRIDE];
+        // We're going to use three separate single-dimensional arrays to store values for three coordinates
+        valuesX = new float[dataSize];
+        valuesY = new float[dataSize];
+        valuesZ = new float[dataSize];
         times = new long[dataSize];
     }
 
@@ -41,7 +38,6 @@ public class DataSet {
      * Resets data end pointer to zero
      */
     public void reset() {
-        valuesLength = 0;
         length = 0;
     }
 
@@ -53,19 +49,16 @@ public class DataSet {
      */
     public boolean put(SensorEvent event) {
         // Check if we're not overflowing allocated arrays
-        if (length == times.length) {
+        if (length == mDataSize) {
             return false;
         }
 
         // If everything is OK, save the data
-        times[length++] = event.timestamp;
-        values[valuesLength++] = event.values[OFFSET_X];
-        values[valuesLength++] = event.values[OFFSET_Y];
-        values[valuesLength++] = event.values[OFFSET_Z];
+        times[length] = event.timestamp;
+        valuesX[length] = event.values[0];
+        valuesY[length] = event.values[1];
+        valuesZ[length] = event.values[2];
+        length++;
         return true;
     }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({OFFSET_X, OFFSET_Y, OFFSET_Z})
-    public @interface Offset {}
 }
