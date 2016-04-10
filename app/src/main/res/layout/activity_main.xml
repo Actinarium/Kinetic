@@ -10,13 +10,7 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:orientation="vertical"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:orientation="vertical">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -37,47 +31,86 @@
 
         </LinearLayout>
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_x"
+        <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:elevation="8dp">
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_y"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_x"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_z"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_y"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_x_rot"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_z"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_y_rot"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_x_rot"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
 
-        <com.actinarium.kinetic.KineticChart
-                android:id="@+id/chart_z_rot"
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:lineColor="#d50000"
-                app:lineThickness="2dp"/>
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_y_rot"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
+
+            <com.actinarium.kinetic.KineticChart
+                    android:id="@+id/chart_z_rot"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/chart_height"
+                    android:paddingLeft="22dp"
+                    android:paddingBottom="8dp"
+                    app:lineColor="@color/chartLine"
+                    app:lineThickness="@dimen/chart_line_thickness"
+                    app:axisColor="@color/chartAxis"
+                    app:axisThickness="@dimen/chart_axis_thickness"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

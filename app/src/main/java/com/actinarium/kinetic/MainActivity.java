@@ -78,17 +78,17 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
 
         mRecordButton.setEnabled(true);
 
-        plot(accelData.times, accelData.valuesX, accelData.length, mChartX);
-        plot(accelData.times, accelData.valuesY, accelData.length, mChartY);
-        plot(accelData.times, accelData.valuesZ, accelData.length, mChartZ);
-        plot(gyroData.times, gyroData.valuesX, gyroData.length, mChartRotX);
-        plot(gyroData.times, gyroData.valuesY, gyroData.length, mChartRotY);
-        plot(gyroData.times, gyroData.valuesZ, gyroData.length, mChartRotZ);
+        plot(accelData.times, accelData.valuesX, accelData.length, mChartX, false);
+        plot(accelData.times, accelData.valuesY, accelData.length, mChartY, false);
+        plot(accelData.times, accelData.valuesZ, accelData.length, mChartZ, false);
+        plot(gyroData.times, gyroData.valuesX, gyroData.length, mChartRotX, true);
+        plot(gyroData.times, gyroData.valuesY, gyroData.length, mChartRotY, true);
+        plot(gyroData.times, gyroData.valuesZ, gyroData.length, mChartRotZ, true);
     }
 
-    private void plot(long[] times, float[] values, int length, KineticChart chart) {
-        float min = values[0];
-        float max = values[0];
+    private void plot(long[] times, float[] values, int length, KineticChart chart, boolean isRotation) {
+        float min = isRotation ? (float) (-Math.PI / 2) : -0.1f;
+        float max = isRotation ? (float) (Math.PI / 2) : 0.1f;
         for (int i = 1; i < length; i++) {
             if (values[i] < min) {
                 min = values[i];

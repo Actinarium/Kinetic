@@ -29,11 +29,14 @@ public class KineticChart extends View {
     // Drawing data
     private Rect mChartArea;
     private Paint mLinePaint;
+    private Paint mAxisPaint;
     private Path mPath;
+    private int mAxisThickness;
 
     // Pre-calculated values
     private float mMultY;
     private double mDivX;
+    private float mZeroY;
 
     public KineticChart(Context context) {
         super(context);
@@ -52,6 +55,8 @@ public class KineticChart extends View {
 
         mLinePaint.setStrokeWidth(array.getDimension(R.styleable.KineticChart_lineThickness, 0));
         mLinePaint.setColor(array.getColor(R.styleable.KineticChart_lineColor, Color.BLACK));
+        mAxisPaint.setColor(array.getColor(R.styleable.KineticChart_axisColor, Color.DKGRAY));
+        mAxisThickness = array.getDimensionPixelSize(R.styleable.KineticChart_axisThickness, 1);
 
         array.recycle();
     }
@@ -65,6 +70,10 @@ public class KineticChart extends View {
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setStrokeJoin(Paint.Join.ROUND);
+        mLinePaint.setStrokeCap(Paint.Cap.SQUARE);
+
+        mAxisPaint = new Paint();
+        mAxisPaint.setStyle(Paint.Style.FILL);
 
         mPath = new Path();
     }
@@ -92,14 +101,19 @@ public class KineticChart extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mLength == 0) {
-            return;
+        // Draw horizontal axis on the zero
+        canvas.drawRect(mChartArea.left, mZeroY - mAxisThickness / 2, mChartArea.right, mZeroY + mAxisThickness / 2, mAxisPaint);
+
+        if (mLength != 0) {
+            // Draw path
+            canvas.save();
+            canvas.translate(mChartArea.left, mChartArea.top + mZeroY);
+            canvas.drawPath(mPath, mLinePaint);
+            canvas.restore();
         }
 
-        canvas.save();
-        canvas.translate(mChartArea.top, mChartArea.left);
-        canvas.drawPath(mPath, mLinePaint);
-        canvas.restore();
+        // Draw vertical axis on the left - over the path
+        canvas.drawRect(mChartArea.left - mAxisThickness, mChartArea.top, mChartArea.left, mChartArea.bottom, mAxisPaint);
     }
 
     /**
@@ -152,6 +166,8 @@ public class KineticChart extends View {
         if (mDivX == 0) {
             mDivX = 1L;
         }
+
+        mZeroY = mChartArea.top + mChartArea.height() * mMax / (mMax - mMin);
     }
 
 
