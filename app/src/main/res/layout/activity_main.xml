@@ -4,6 +4,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         tools:context="com.actinarium.kinetic.MainActivity">
 
     <LinearLayout
@@ -13,7 +14,9 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -34,35 +37,47 @@
 
         </LinearLayout>
 
-        <com.github.mikephil.charting.charts.LineChart
+        <com.actinarium.kinetic.KineticChart
                 android:id="@+id/chart_x"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
-        <com.github.mikephil.charting.charts.LineChart
+        <com.actinarium.kinetic.KineticChart
                 android:id="@+id/chart_y"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
-        <com.github.mikephil.charting.charts.LineChart
+        <com.actinarium.kinetic.KineticChart
                 android:id="@+id/chart_z"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
-        <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chart_rot_x"
+        <com.actinarium.kinetic.KineticChart
+                android:id="@+id/chart_x_rot"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
-        <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chart_rot_y"
+        <com.actinarium.kinetic.KineticChart
+                android:id="@+id/chart_y_rot"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
-        <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chart_rot_z"
+        <com.actinarium.kinetic.KineticChart
+                android:id="@+id/chart_z_rot"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="120dp"
+                app:lineColor="#d50000"
+                app:lineThickness="2dp"/>
 
     </LinearLayout>
 

@@ -9,21 +9,15 @@ import com.actinarium.kinetic.pipeline.CodeGenerator;
 import com.actinarium.kinetic.pipeline.DataRecorder;
 import com.actinarium.kinetic.pipeline.DataTransformer;
 import com.actinarium.kinetic.util.DataSet;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements DataRecorder.Callback {
 
-    private LineChart mChartX;
-    private LineChart mChartY;
-    private LineChart mChartZ;
-    private LineChart mChartRotX;
-    private LineChart mChartRotY;
-    private LineChart mChartRotZ;
+    private KineticChart mChartX;
+    private KineticChart mChartY;
+    private KineticChart mChartZ;
+    private KineticChart mChartRotX;
+    private KineticChart mChartRotY;
+    private KineticChart mChartRotZ;
     private Button mRecordButton;
 
     private DataRecorder mRecorder;
@@ -35,14 +29,14 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
         setContentView(R.layout.activity_main);
 
         mRecordButton = (Button) findViewById(R.id.record);
-        mChartX = (LineChart) findViewById(R.id.chart_x);
-        mChartY = (LineChart) findViewById(R.id.chart_y);
-        mChartZ = (LineChart) findViewById(R.id.chart_z);
-        mChartRotX = (LineChart) findViewById(R.id.chart_rot_x);
-        mChartRotY = (LineChart) findViewById(R.id.chart_rot_y);
-        mChartRotZ = (LineChart) findViewById(R.id.chart_rot_z);
+        mChartX = (KineticChart) findViewById(R.id.chart_x);
+        mChartY = (KineticChart) findViewById(R.id.chart_y);
+        mChartZ = (KineticChart) findViewById(R.id.chart_z);
+        mChartRotX = (KineticChart) findViewById(R.id.chart_x_rot);
+        mChartRotY = (KineticChart) findViewById(R.id.chart_y_rot);
+        mChartRotZ = (KineticChart) findViewById(R.id.chart_z_rot);
 
-        mRecorder = new DataRecorder(this, this, DataRecorder.DEFAULT_RECORDING_TIME_MILLIS, DataRecorder.DEFAULT_SAMPLING_MICROS);
+        mRecorder = new DataRecorder(this, this, 2000, DataRecorder.DEFAULT_SAMPLING_MICROS);
 
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,31 +77,26 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
         DataTransformer.integrate(gyroData);
 
         mRecordButton.setEnabled(true);
-        plot(accelData, mChartX, mChartY, mChartZ);
-        plot(gyroData, mChartRotX, mChartRotY, mChartRotZ);
+
+        plot(accelData.times, accelData.valuesX, accelData.length, mChartX);
+        plot(accelData.times, accelData.valuesY, accelData.length, mChartY);
+        plot(accelData.times, accelData.valuesZ, accelData.length, mChartZ);
+        plot(gyroData.times, gyroData.valuesX, gyroData.length, mChartRotX);
+        plot(gyroData.times, gyroData.valuesY, gyroData.length, mChartRotY);
+        plot(gyroData.times, gyroData.valuesZ, gyroData.length, mChartRotZ);
     }
 
-    private void plot(DataSet dataSet, LineChart chartX, LineChart chartY, LineChart chartZ) {
-        int length = dataSet.length;
-        long startTime = dataSet.times[0];
-
-        ArrayList<Entry> entriesX = new ArrayList<>(length);
-        ArrayList<Entry> entriesY = new ArrayList<>(length);
-        ArrayList<Entry> entriesZ = new ArrayList<>(length);
-        ArrayList<String> dataX = new ArrayList<>(length);
-
-        for (int i = 0; i < length; i++) {
-            dataX.add(Double.toString((dataSet.times[i] - startTime) / 1000000000.0));
-            entriesX.add(new Entry(dataSet.valuesX[i], i));
-            entriesY.add(new Entry(dataSet.valuesY[i], i));
-            entriesZ.add(new Entry(dataSet.valuesZ[i], i));
+    private void plot(long[] times, float[] values, int length, KineticChart chart) {
+        float min = values[0];
+        float max = values[0];
+        for (int i = 1; i < length; i++) {
+            if (values[i] < min) {
+                min = values[i];
+            } else if (values[i] > max) {
+                max = values[i];
+            }
         }
 
-        chartX.setData(new LineData(dataX, new LineDataSet(entriesX, null)));
-        chartY.setData(new LineData(dataX, new LineDataSet(entriesY, null)));
-        chartZ.setData(new LineData(dataX, new LineDataSet(entriesZ, null)));
-        chartX.invalidate();
-        chartY.invalidate();
-        chartZ.invalidate();
+        chart.setData(times, values, length, min, max, 0, 0);
     }
 }
