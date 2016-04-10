@@ -5,11 +5,11 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 /**
- * Generates Java code out of the provided data array
+ * Utility class with a method to generate Java code out of the provided data array
  *
  * @author Paul Danyliuk
  */
-public class CodeGenerator {
+public final class CodeGenerator {
 
     /**
      * Template for a resulting table lookup interpolator. The parameters are: <ol> <li>Package name</li> <li>Class
@@ -73,7 +73,10 @@ public class CodeGenerator {
      */
     private static final int VALUES_PER_ROW = 6;
 
-    private static final NumberFormat FORMAT = makeFormat();
+    /**
+     * Private constructor, to prevent instantiation
+     */
+    private CodeGenerator() {}
 
     /**
      * Generates Java code for a table lookup interpolator based on provided values
@@ -81,14 +84,18 @@ public class CodeGenerator {
      * @param packageName package name to write into the template
      * @param className   class name to write into the template
      * @param values      an array of float values that must be recorded at equal intervals
+     * @param length      number of values to pick from the provided array
      * @return generated drop-in Java code
      */
-    public String generateInterpolatorCode(String packageName, String className, float[] values) {
-        StringBuilder valuesBuilder = new StringBuilder(values.length * CHARS_PER_VALUE);
+    public static String generateInterpolatorCode(String packageName, String className, float[] values, int length) {
+        NumberFormat format = DecimalFormat.getNumberInstance(Locale.ROOT);
+        format.setMinimumFractionDigits(4);
+        format.setMaximumFractionDigits(4);
+        StringBuilder valuesBuilder = new StringBuilder(length * CHARS_PER_VALUE);
 
         // Append all values but the last one
-        for (int i = 0, len = values.length - 1; i < len; /* incremented in loop body */) {
-            valuesBuilder.append(FORMAT.format(values[i])).append('f').append(',');
+        for (int i = 0, len = length - 1; i < len; /* incremented in loop body */) {
+            valuesBuilder.append(format.format(values[i])).append('f').append(',');
             if (++i % VALUES_PER_ROW == 0) {
                 valuesBuilder.append('\n');
             } else {
@@ -96,17 +103,10 @@ public class CodeGenerator {
             }
         }
         // Append last value
-        valuesBuilder.append(FORMAT.format(values[values.length - 1])).append('f');
+        valuesBuilder.append(format.format(values[length - 1])).append('f');
 
         // and generate Java code out of the given template
         return String.format(TABLE_LOOKUP_TEMPLATE, packageName, className, valuesBuilder.toString());
-    }
-
-    private static NumberFormat makeFormat() {
-        NumberFormat format = DecimalFormat.getNumberInstance(Locale.ROOT);
-        format.setMinimumFractionDigits(4);
-        format.setMaximumFractionDigits(4);
-        return format;
     }
 
 }

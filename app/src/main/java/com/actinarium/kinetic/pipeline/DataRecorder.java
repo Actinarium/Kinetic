@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.support.annotation.IntDef;
+import android.util.Log;
 import com.actinarium.kinetic.util.DataSet;
 
 import java.lang.annotation.Retention;
@@ -19,7 +20,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class DataRecorder {
 
-    public static final int DEFAULT_RECORDING_TIME_MILLIS = 2000;
+    private static final String TAG = "DataRecorder";
+
+    public static final int DEFAULT_RECORDING_TIME_MILLIS = 5000;
     public static final int DEFAULT_SAMPLING_MICROS = 5000;
 
     public static final int STATUS_FAILURE_GENERIC = -1;
@@ -77,7 +80,7 @@ public class DataRecorder {
             }
 
             @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) { /* no-op */ }
+            public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Accel accuracy: " + accuracy); }
         };
         mGyroSensorListener = new SensorEventListener() {
             @Override
@@ -88,7 +91,7 @@ public class DataRecorder {
             }
 
             @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) { /* no-op */ }
+            public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Gyro accuracy: " + accuracy); }
         };
     }
 

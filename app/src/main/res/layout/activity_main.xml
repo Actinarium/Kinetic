@@ -15,11 +15,24 @@
             android:paddingBottom="@dimen/activity_vertical_margin"
             android:orientation="vertical">
 
-        <Button
-                android:id="@+id/record"
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Start recording"/>
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/record"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start recording"/>
+
+            <Button
+                    android:id="@+id/save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Save for X"/>
+
+        </LinearLayout>
 
         <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chart_x"

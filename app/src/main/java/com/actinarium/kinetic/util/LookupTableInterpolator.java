@@ -20,10 +20,11 @@ public class LookupTableInterpolator implements Interpolator {
      * Create a new interpolator for a given set of values
      *
      * @param values Values for the lookup table, recorded at fixed time step
+     * @param length Number of values to pick from the provided array
      */
-    public LookupTableInterpolator(float[] values) {
+    public LookupTableInterpolator(float[] values, int length) {
         mValues = values;
-        mLengthMinusOne = values.length - 1;
+        mLengthMinusOne = length - 1;
         mStepSize = 1f / mLengthMinusOne;
     }
 

@@ -1,10 +1,13 @@
 package com.actinarium.kinetic;
 
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import com.actinarium.kinetic.pipeline.CodeGenerator;
 import com.actinarium.kinetic.pipeline.DataRecorder;
+import com.actinarium.kinetic.pipeline.DataTransformer;
 import com.actinarium.kinetic.util.DataSet;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
     private Button mRecordButton;
 
     private DataRecorder mRecorder;
+    private DataSet mAccelData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +51,37 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
                 mRecorder.start();
             }
         });
+
+        Button saveButton = (Button) findViewById(R.id.save);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mAccelData == null) {
+                    return;
+                }
+
+                String javaCode = CodeGenerator.generateInterpolatorCode("com.example.kinetic", "FantasticInterpolator", mAccelData.valuesX, mAccelData.length);
+                ShareCompat.IntentBuilder.from(MainActivity.this)
+                        .setType("text/plain")
+                        .setText(javaCode)
+                        .startChooser();
+            }
+        });
     }
 
     @Override
     public void onDataRecordedResult(@DataRecorder.Status int status, DataSet accelData,
                                      DataSet gyroData, float[] initialOrientation) {
+        mAccelData = accelData;
+
+        // acceleration -> velocity
+        DataTransformer.integrate(accelData);
+        // velocity -> offset
+        DataTransformer.integrate(accelData);
+
+//         angular velocity -> phase
+        DataTransformer.integrate(gyroData);
+
         mRecordButton.setEnabled(true);
         plot(accelData, mChartX, mChartY, mChartZ);
         plot(gyroData, mChartRotX, mChartRotY, mChartRotZ);

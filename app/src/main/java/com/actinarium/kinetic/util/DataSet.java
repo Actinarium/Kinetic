@@ -3,20 +3,21 @@ package com.actinarium.kinetic.util;
 import android.hardware.SensorEvent;
 
 /**
- * A mutable sensor data set backed by four reusable arrays (timestamps and three value sets) of fixed lengths
+ * A mutable sensor data set backed by four reusable arrays (timestamps and three value sets) of fixed lengths. Its
+ * mutability is a trade-off aimed to reduce memory churn (allocations and GCs).
  */
 public class DataSet {
 
-    public long[] times;
-    public float[] valuesX;
-    public float[] valuesY;
-    public float[] valuesZ;
+    public final long[] times;
+    public final float[] valuesX;
+    public final float[] valuesY;
+    public final float[] valuesZ;
     /**
      * Number of fresh values in each of data set arrays, starting from index zero. Values with index equal or greater
      * than length are stale and should not be used.
      */
     public int length;
-    private int mDataSize;
+    private final int mDataSize;
 
     /**
      * Create a new data set for provided number of sensor events
