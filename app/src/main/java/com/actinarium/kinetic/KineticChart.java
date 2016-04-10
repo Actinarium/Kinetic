@@ -70,7 +70,7 @@ public class KineticChart extends View {
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setStrokeJoin(Paint.Join.ROUND);
-        mLinePaint.setStrokeCap(Paint.Cap.SQUARE);
+        mLinePaint.setStrokeCap(Paint.Cap.ROUND);
 
         mAxisPaint = new Paint();
         mAxisPaint.setStyle(Paint.Style.FILL);
@@ -107,7 +107,7 @@ public class KineticChart extends View {
         if (mLength != 0) {
             // Draw path
             canvas.save();
-            canvas.translate(mChartArea.left, mChartArea.top + mZeroY);
+            canvas.translate(mChartArea.left, mZeroY);
             canvas.drawPath(mPath, mLinePaint);
             canvas.restore();
         }
@@ -160,7 +160,7 @@ public class KineticChart extends View {
         }
 
         // Division factor for transforming times into chart x coords
-        if (mTimes != null) {
+        if (mTimes != null && mChartArea.width() != 0) {
             mDivX = (mTimes[mLength - 1] - mTimes[0]) / mChartArea.width();
         }
         if (mDivX == 0) {

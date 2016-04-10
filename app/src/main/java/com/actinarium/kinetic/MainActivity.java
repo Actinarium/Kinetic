@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements DataRecorder.Call
         setContentView(R.layout.activity_main);
 
         mRecordButton = (Button) findViewById(R.id.record);
-        mChartX = (KineticChart) findViewById(R.id.chart_x);
+        mChartX = (KineticChart) findViewById(R.id.chart);
         mChartY = (KineticChart) findViewById(R.id.chart_y);
         mChartZ = (KineticChart) findViewById(R.id.chart_z);
         mChartRotX = (KineticChart) findViewById(R.id.chart_x_rot);

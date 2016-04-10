@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.actinarium.kinetic"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -26,4 +26,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile "com.android.support:design:$supportLibVersion"
+    compile 'com.actinarium.aligned:aligned:0.1'
 }

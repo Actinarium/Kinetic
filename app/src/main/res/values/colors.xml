@@ -5,6 +5,7 @@
     <color name="colorAccent">#d50000</color>
 
     <color name="windowBackground">#EEEEEE</color>
+    <color name="hairline">#1f000000</color>
 
     <color name="chartLine">#d50000</color>
     <color name="chartAxis">#616161</color>

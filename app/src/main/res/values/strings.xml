@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Kinetic</string>
+
+    <string name="delete_measurement">Delete measurement</string>
+    <string name="rectify">Rectify</string>
+    <string name="export">Export</string>
 </resources>

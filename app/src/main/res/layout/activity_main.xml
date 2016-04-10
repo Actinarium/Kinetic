@@ -31,20 +31,32 @@
 
         </LinearLayout>
 
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="200dp">
+
+            <View
+                    android:id="@+id/preview_box"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@color/colorAccent"
+                    android:layout_gravity="center"/>
+
+        </FrameLayout>
+
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@android:color/white"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:clipChildren="false"
-                android:clipToPadding="false"
                 android:elevation="8dp">
 
+            <include layout="@layout/item_measurement" />
+            <include layout="@layout/item_measurement" />
+            <include layout="@layout/item_measurement" />
+
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_x"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
@@ -56,6 +68,7 @@
                     app:axisThickness="@dimen/chart_axis_thickness"/>
 
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_y"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
@@ -67,6 +80,7 @@
                     app:axisThickness="@dimen/chart_axis_thickness"/>
 
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_z"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
@@ -78,6 +92,7 @@
                     app:axisThickness="@dimen/chart_axis_thickness"/>
 
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_x_rot"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
@@ -89,6 +104,7 @@
                     app:axisThickness="@dimen/chart_axis_thickness"/>
 
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_y_rot"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
@@ -100,6 +116,7 @@
                     app:axisThickness="@dimen/chart_axis_thickness"/>
 
             <com.actinarium.kinetic.KineticChart
+                    android:visibility="gone"
                     android:id="@+id/chart_z_rot"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/chart_height"
