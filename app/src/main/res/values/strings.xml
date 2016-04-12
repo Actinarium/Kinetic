@@ -1,7 +1,30 @@
 <resources>
     <string name="app_name">Kinetic</string>
+    <string name="app_subtitle">By Actinarium</string>
 
-    <string name="delete_measurement">Delete measurement</string>
-    <string name="rectify">Rectify</string>
+    <string name="app_howto">Record authentic motion with motion:\n1. Press Record button\n2. Move the device (up to 5 seconds)\n3. Preview and adjust the result\n4. Export as Java interpolator code</string>
+    <string name="app_error">Something went wrong. Please try again.</string>
+
+    <string name="dialog_discard_message">Discard this recording?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep editing</string>
+
+    <string name="toggle_measurement">Toggle measurement</string>
+    <string name="interpolator_range">Interpolator 0 and 1:</string>
+    <string-array name="result_titles">
+        <item>Offset — X</item>
+        <item>Offset — Y</item>
+        <item>Offset — Z</item>
+        <item>Rotation — Pitch</item>
+        <item>Rotation — Roll</item>
+        <item>Rotation — Yaw</item>
+        <item>Rotation (world) — Pitch</item>
+        <item>Rotation (world) — Roll</item>
+        <item>Rotation (world) — Yaw</item>
+    </string-array>
+
     <string name="export">Export</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

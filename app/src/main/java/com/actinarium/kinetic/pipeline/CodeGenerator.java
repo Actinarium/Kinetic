@@ -63,10 +63,10 @@ public final class CodeGenerator {
             + "\n}";
 
     /**
-     * How many chars a lookup table value takes, given that the format is <code>0.1234f, </code> with either space or
-     * newline in the end
+     * How many chars a lookup table line takes, given that the format of an individual value is <code>0.1234f</code>,
+     * 6 per row, delimited with comma, and spaces or newline in the end, plus 16 leading spaces for line indents
      */
-    private static final int CHARS_PER_VALUE = 9;
+    private static final int CHARS_PER_LINE = 70;
 
     /**
      * How many values per row to print. For pretty output.
@@ -91,13 +91,13 @@ public final class CodeGenerator {
         NumberFormat format = DecimalFormat.getNumberInstance(Locale.ROOT);
         format.setMinimumFractionDigits(4);
         format.setMaximumFractionDigits(4);
-        StringBuilder valuesBuilder = new StringBuilder(length * CHARS_PER_VALUE);
+        StringBuilder valuesBuilder = new StringBuilder(CHARS_PER_LINE * (length / VALUES_PER_ROW + 1));
 
         // Append all values but the last one
         for (int i = 0, len = length - 1; i < len; /* incremented in loop body */) {
             valuesBuilder.append(format.format(values[i])).append('f').append(',');
             if (++i % VALUES_PER_ROW == 0) {
-                valuesBuilder.append('\n');
+                valuesBuilder.append("\n            ");
             } else {
                 valuesBuilder.append(' ');
             }

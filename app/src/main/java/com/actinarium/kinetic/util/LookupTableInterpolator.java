@@ -12,21 +12,29 @@ import android.view.animation.Interpolator;
  */
 public class LookupTableInterpolator implements Interpolator {
 
-    private final float[] mValues;
-    private final float mStepSize;
-    private final int mLengthMinusOne;
+    private float[] mValues;
+    private float mStepSize;
+    private int mLengthMinusOne;
+    private float mValueAdd;
+    private float mValueMult;
 
     /**
      * Create a new interpolator for a given set of values
      *
-     * @param values Values for the lookup table, recorded at fixed time step
-     * @param length Number of values to pick from the provided array
+     * @param values   Raw values for the lookup table, recorded at fixed time step
+     * @param start    Index of the first value of the array to use, inclusively
+     * @param end      Index of the last value of the array to use, inclusively
+     * @param valueAdd Used to convert
      */
-    public LookupTableInterpolator(float[] values, int length) {
+    public LookupTableInterpolator(float[] values, int start, int end, float valueAdd, float valueMult) {
         mValues = values;
-        mLengthMinusOne = length - 1;
+        mLengthMinusOne = end - start - 2;
         mStepSize = 1f / mLengthMinusOne;
+        mValueAdd = valueAdd;
+        mValueMult = valueMult;
     }
+
+//    public void setData(float[] values, int length, float valueAdd, float valueMult)
 
     @Override
     public float getInterpolation(float input) {
@@ -46,7 +54,11 @@ public class LookupTableInterpolator implements Interpolator {
         float weight = diff / mStepSize;
 
         // Linearly interpolate between the table values
-        float valueLeft = mValues[index];
-        return valueLeft + weight * (mValues[index + 1] - valueLeft);
+        float value = mValues[index];
+        value = value + weight * (mValues[index + 1] - value);
+
+        // todo: normalize value given provided bounds
+
+        return value;
     }
 }

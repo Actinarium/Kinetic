@@ -1,134 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<FrameLayout
+        android:id="@+id/root_container"
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        tools:context="com.actinarium.kinetic.MainActivity">
+        tools:context=".ui.MainActivity">
 
-    <LinearLayout
+    <!-- Make an elevation shadow under status bar -->
+    <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="24dp"
+            android:translationY="-24dp"
+            android:background="?colorPrimaryDark"
+            android:elevation="4dp" />
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-            <Button
-                    android:id="@+id/record"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Start recording"/>
-
-            <Button
-                    android:id="@+id/save"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Save for X"/>
-
-        </LinearLayout>
-
-        <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="200dp">
-
-            <View
-                    android:id="@+id/preview_box"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@color/colorAccent"
-                    android:layout_gravity="center"/>
-
-        </FrameLayout>
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@android:color/white"
-                android:elevation="8dp">
-
-            <include layout="@layout/item_measurement" />
-            <include layout="@layout/item_measurement" />
-            <include layout="@layout/item_measurement" />
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_x"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_y"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_z"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_x_rot"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_y_rot"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-            <com.actinarium.kinetic.KineticChart
-                    android:visibility="gone"
-                    android:id="@+id/chart_z_rot"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/chart_height"
-                    android:paddingLeft="22dp"
-                    android:paddingBottom="8dp"
-                    app:lineColor="@color/chartLine"
-                    app:lineThickness="@dimen/chart_line_thickness"
-                    app:axisColor="@color/chartAxis"
-                    app:axisThickness="@dimen/chart_axis_thickness"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</ScrollView>
+</FrameLayout>

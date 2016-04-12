@@ -97,6 +97,7 @@ public class KineticChart extends View {
                 bottom - top - getPaddingBottom()
         );
         recalculateChartMetrics();
+        recalculateChartPath();
     }
 
     @Override
@@ -136,14 +137,16 @@ public class KineticChart extends View {
         mMax = max;
         mStepY = stepY;
         mStepX = stepX;
-        recalculateChartMetrics();
-        recalculateChartPath();
-        invalidate();
+        if (!mChartArea.isEmpty()) {
+            recalculateChartMetrics();
+            recalculateChartPath();
+            invalidate();
+        }
     }
 
     private void recalculateChartPath() {
         mPath.rewind();
-        mPath.moveTo((mValues[0]) * mMultY, 0);
+        mPath.moveTo(0, (mValues[0]) * mMultY);
         for (int i = 1; i < mLength; i++) {
             mPath.lineTo((float) ((mTimes[i] - mTimes[0]) / mDivX), (mValues[i]) * mMultY);
         }

@@ -8,7 +8,8 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.support.annotation.IntDef;
 import android.util.Log;
-import com.actinarium.kinetic.util.DataSet;
+import com.actinarium.kinetic.util.DataSet3;
+import com.actinarium.kinetic.util.DataSet4;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,19 +34,22 @@ public class DataRecorder {
     private SensorManager mSensorManager;
     private Sensor mAccelSensor;
     private Sensor mGyroSensor;
+    private Sensor mRotVectorSensor;
+
+    private DataSet3 mAccelDataSet;
+    private DataSet3 mGyroDataSet;
+    private DataSet4 mRotVectorDataSet;
+
+    private SensorEventListener mAccelSensorListener;
+    private SensorEventListener mGyroSensorListener;
+    private SensorEventListener mRotVectorSensorListener;
+
+    private Handler mHandler;
+    private Runnable mRunnable;
 
     private Callback mCallback;
     private int mRecordingTimeMillis;
     private int mSamplingRateMicros;
-
-    private final float[] mInitialOrientation = {0f, 0f, 1f};
-    private DataSet mAccelDataSet;
-    private DataSet mGyroDataSet;
-
-    private SensorEventListener mAccelSensorListener;
-    private SensorEventListener mGyroSensorListener;
-    private Handler mHandler;
-    private Runnable mRunnable;
 
     /**
      * Create and initialize a data recorder component.
@@ -59,6 +63,7 @@ public class DataRecorder {
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        mRotVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         mCallback = callback;
         mRecordingTimeMillis = recordingTimeMillis;
@@ -67,8 +72,9 @@ public class DataRecorder {
         // Based on latency and recording times, how many values we ought to capture, with 20% safety overhead
         final int dataSize = recordingTimeMillis * 1200 / samplingRateMicros + 1;
 
-        mAccelDataSet = new DataSet(dataSize);
-        mGyroDataSet = new DataSet(dataSize);
+        mAccelDataSet = new DataSet3(dataSize);
+        mGyroDataSet = new DataSet3(dataSize);
+        mRotVectorDataSet = new DataSet4(dataSize);
 
         // Create listeners
         mAccelSensorListener = new SensorEventListener() {
@@ -93,6 +99,17 @@ public class DataRecorder {
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Gyro accuracy: " + accuracy); }
         };
+        mRotVectorSensorListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                if (!mRotVectorDataSet.put(event)) {
+                    doStop(STATUS_OUT_OF_BOUNDS);
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Rotation vector accuracy: " + accuracy); }
+        };
     }
 
     /**
@@ -106,6 +123,7 @@ public class DataRecorder {
 
         mAccelDataSet.reset();
         mGyroDataSet.reset();
+        mRotVectorDataSet.reset();
 
         // todo: determine initial rotation around X and Y axes (we don't care which direction the device is pointing)
 
@@ -113,6 +131,7 @@ public class DataRecorder {
         // todo: implement delayed reporting (with H/W queue) for KitKat+
         mSensorManager.registerListener(mAccelSensorListener, mAccelSensor, mSamplingRateMicros);
         mSensorManager.registerListener(mGyroSensorListener, mGyroSensor, mSamplingRateMicros);
+        mSensorManager.registerListener(mRotVectorSensorListener, mRotVectorSensor, mSamplingRateMicros);
 
         // Register a handler and a runnable to stop listening after the timeout
         mHandler = new Handler();
@@ -138,8 +157,9 @@ public class DataRecorder {
         }
         mSensorManager.unregisterListener(mAccelSensorListener);
         mSensorManager.unregisterListener(mGyroSensorListener);
+        mSensorManager.unregisterListener(mRotVectorSensorListener);
 
-        mCallback.onDataRecordedResult(status, mAccelDataSet, mGyroDataSet, mInitialOrientation);
+        mCallback.onDataRecordedResult(status, mAccelDataSet, mGyroDataSet, mRotVectorDataSet);
     }
 
     /**
@@ -151,12 +171,12 @@ public class DataRecorder {
          * Called when data recorder status is determined. All arguments are mutable and reusable, so you should neither
          * change nor hold onto them.
          *
-         * @param status             Reported status
-         * @param accelData          Holds recorded data for accelerometer values
-         * @param gyroData           Holds recorded data for gyroscope values
-         * @param initialOrientation Holds information regarding initial device orientation
+         * @param status        Reported status
+         * @param accelData     Holds recorded data for accelerometer values
+         * @param gyroData      Holds recorded data for gyroscope values
+         * @param rotVectorData Holds recorded data for rotation vector values
          */
-        void onDataRecordedResult(@Status int status, DataSet accelData, DataSet gyroData, float[] initialOrientation);
+        void onDataRecordedResult(@Status int status, DataSet3 accelData, DataSet3 gyroData, DataSet4 rotVectorData);
     }
 
     @Retention(RetentionPolicy.SOURCE)

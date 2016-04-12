@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#9E9E9E</color>
+    <color name="colorPrimary">#616161</color>
     <color name="colorPrimaryDark">#212121</color>
     <color name="colorAccent">#d50000</color>
 
+    <color name="colorOverscroll">#9E9E9E</color>
     <color name="windowBackground">#EEEEEE</color>
     <color name="hairline">#1f000000</color>
 

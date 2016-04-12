@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <!-- Preview container, ~16:9 on Nexus 5 -->
+    <FrameLayout
+            android:id="@+id/preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/preview_height">
+
+        <View
+                android:id="@+id/preview_sprite"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@color/colorAccent"
+                android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+    <!-- "Action bar": discard button -->
+
+    <ImageButton
+            android:id="@+id/discard"
+            android:background="?attr/selectableItemBackground"
+            android:layout_width="56dp"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="top|start"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_close"
+            android:contentDescription="@string/discard"/>
+
+    <!-- Preview speed control pushed to the next iteration -->
+
+    <SeekBar
+            android:visibility="gone"
+            android:theme="@style/AppTheme.DimSeekBar"
+            android:id="@+id/playback_scale"
+            android:layout_width="96dp"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:progress="3"
+            android:max="6" />
+
+    <com.actinarium.aligned.TextView
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp"
+            android:layout_marginEnd="96dp"
+            app:firstLineLeading="32dp"
+            android:text="1x" />
+
+    <!-- "Bottom sheet" -->
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/preview_height"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:elevation="8dp">
+
+        <!-- todo: static controls-->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <Button
+                    android:id="@+id/save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Save for X"/>
+
+        </LinearLayout>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_marginTop="3dp"
+                android:layout_height="1dp"
+                android:background="@color/hairline"/>
+
+        <!-- Recording items -->
+
+        <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                xmlns:app="http://schemas.android.com/apk/res-auto">
+
+            <LinearLayout
+                    android:id="@+id/item_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <!-- Items will be added here -->
+
+                <!-- Footer (export button) will be added here -->
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</FrameLayout>

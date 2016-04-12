@@ -27,4 +27,5 @@ dependencies {
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile "com.android.support:design:$supportLibVersion"
     compile 'com.actinarium.aligned:aligned:0.1'
+    compile 'com.android.support:support-v4:23.3.0'
 }
