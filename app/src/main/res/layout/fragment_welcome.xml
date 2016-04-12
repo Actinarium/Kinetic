@@ -33,11 +33,11 @@
                 android:textSize="14sp"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                app:leading="16dp"
+                app:leading="20dp"
                 app:lastLineDescent="24dp"
                 android:text="@string/app_subtitle"/>
 
-        <com.actinarium.aligned.TextView
+        <com.actinarium.kinetic.ui.BlockquoteTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -49,6 +49,17 @@
                 app:lastLineDescent="8dp"
                 android:text="@string/app_howto"
                 android:breakStrategy="balanced"/>
+
+        <com.actinarium.aligned.TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                app:leading="28dp"
+                app:lastLineDescent="8dp"
+                android:text="@string/app_disclaimer"/>
 
     </LinearLayout>
 

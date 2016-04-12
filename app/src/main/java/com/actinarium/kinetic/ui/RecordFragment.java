@@ -52,12 +52,24 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        mRecorder.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onPause();
+        mRecorder.stop();
+    }
+
+    @Override
     public void onClick(View v) {
         if (!mIsRecording) {
             // Start recording
             mIsRecording = true;
             mRecordButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
-            mRecorder.start();
+            mRecorder.startRecording();
         } else {
             // Stop recording - the drawable and the boolean will be updated in a callback method
             mRecorder.stop();
@@ -65,16 +77,18 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
     }
 
     @Override
-    public void onDataRecordedResult(@DataRecorder.Status int status, DataSet3 accelData, DataSet3 gyroData, DataSet4 rotVectorData) {
+    public void onDataRecordedResult(@DataRecorder.Status int status, DataSet3 accelData, DataSet3 gyroData,
+                                     DataSet4 rotVectorData, float[] gravity) {
         mIsRecording = false;
         mRecordButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_record));
 
-        if (status < 0) {
+        if (status == DataRecorder.STATUS_FAILURE_NO_SENSOR) {
+            Toast.makeText(getContext(), R.string.sensor_error, Toast.LENGTH_SHORT).show();
+        } else if (status < 0) {
             Toast.makeText(getContext(), R.string.app_error, Toast.LENGTH_SHORT).show();
         } else {
             // Try to remove gravity from raw readings
-//            DataTransformer.removeGravityFromRaw(accelData, rotVectorData, accelData);
-//            DataTransformer.reduceJitter(accelData, 0.1f, accelData);
+            DataTransformer.removeGravityFromRaw(accelData, rotVectorData, accelData, gravity);
 
             // Integrate raw readings:
 
@@ -85,8 +99,6 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
 
             // angular velocity -> phase
             DataTransformer.integrate(gyroData);
-
-//            DataTransformer.offsetYaw(gyroData);
 
             mHost.onDataRecorded(accelData, gyroData, rotVectorData);
         }

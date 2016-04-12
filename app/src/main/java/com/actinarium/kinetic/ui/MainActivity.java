@@ -9,6 +9,10 @@ import com.actinarium.kinetic.util.DataSet4;
 
 public class MainActivity extends AppCompatActivity implements RecordFragment.Host, ResultsFragment.Host {
 
+    private static final String ARG_ACCEL = "com.actinarium.kinetic.bundle.ACCEL";
+    private static final String ARG_GYRO = "com.actinarium.kinetic.bundle.GYRO";
+    private static final String ARG_RV = "com.actinarium.kinetic.bundle.RV";
+
     private DataSet3 mAccelData;
     private DataSet3 mGyroData;
     private DataSet4 mRotVectorData;
@@ -19,6 +23,9 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
+            mAccelData = savedInstanceState.getParcelable(ARG_ACCEL);
+            mGyroData = savedInstanceState.getParcelable(ARG_GYRO);
+            mRotVectorData = savedInstanceState.getParcelable(ARG_RV);
             return;
         }
 
@@ -53,11 +60,6 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
     }
 
     @Override
-    public DataSet4 getRotVectorData() {
-        return mRotVectorData;
-    }
-
-    @Override
     public void onRecordingDiscarded() {
         super.onBackPressed();
     }
@@ -70,5 +72,13 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(ARG_ACCEL, mAccelData);
+        outState.putParcelable(ARG_GYRO, mGyroData);
+        outState.putParcelable(ARG_RV, mRotVectorData);
     }
 }

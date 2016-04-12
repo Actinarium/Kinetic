@@ -5,7 +5,6 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
-import com.actinarium.kinetic.KineticChart;
 import com.actinarium.kinetic.R;
 
 /**
@@ -14,6 +13,9 @@ import com.actinarium.kinetic.R;
  * @author Paul Danyliuk
  */
 public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
+
+    private final int mId;
+    private final Host mHost;
 
     private final boolean mIsRotation;
     private boolean mIsRangeZeroModified;
@@ -27,11 +29,15 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
     /**
      * Create a holder for a single result row and wire up interactivity
      *
+     * @param id         Integer to identify this holder in a callback
+     * @param host       Callback to the fragment/activity/whatever
      * @param rootView   A row view inflated from R.layout.item_measurement
      * @param title      Title to display for this item
      * @param isRotation If this chart is for rotation data as opposed to offset data
      */
-    public ResultHolder(View rootView, String title, boolean isRotation) {
+    public ResultHolder(int id, Host host, View rootView, String title, boolean isRotation) {
+        mId = id;
+        mHost = host;
         mIsRotation = isRotation;
 
         TextView titleLabel = (TextView) rootView.findViewById(R.id.title);
@@ -54,12 +60,12 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
                     mChart.setVisibility(View.GONE);
                     rangeHolder.setVisibility(View.GONE);
                 }
+                mHost.onResultToggle(mId, isChecked);
             }
         });
 
         mRangeZero.setOnSeekBarChangeListener(this);
         mRangeOne.setOnSeekBarChangeListener(this);
-
     }
 
     public void plotData(long[] times, float[] values, int length) {
@@ -98,4 +104,8 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) { /* no-op */ }
+
+    public interface Host {
+        void onResultToggle(int id, boolean enabled);
+    }
 }

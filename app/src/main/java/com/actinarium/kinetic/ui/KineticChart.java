@@ -1,4 +1,4 @@
-package com.actinarium.kinetic;
+package com.actinarium.kinetic.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+import com.actinarium.kinetic.R;
 
 /**
  * Own implementation of chart optimized for rendering data from Kinetic app

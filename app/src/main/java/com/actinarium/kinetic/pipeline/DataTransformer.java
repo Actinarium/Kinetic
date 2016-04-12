@@ -6,8 +6,8 @@ import com.actinarium.kinetic.util.DataSet3;
 import com.actinarium.kinetic.util.DataSet4;
 
 /**
- * Utility class that performs various processing and transformation on provided sensor data, such as double-integrating
- * acceleration into offsets, filtering out gravity, reducing jitter etc.
+ * Utility class that performs various processing and transformation on provided sensor data, such as integrating
+ * acceleration into velocity into offset, filtering out gravity, <s>reducing jitter</s> etc.
  *
  * @author Paul Danyliuk
  */
@@ -55,60 +55,32 @@ public final class DataTransformer {
         }
     }
 
-    public static void offsetYaw(DataSet3 dataSet) {
-        float initialYaw = dataSet.valuesZ[0];
-        for (int i = 0; i < dataSet.length; i++) {
-            dataSet.valuesZ[i] -= initialYaw;
-        }
-    }
-
-    public static void transformAccelToWorld(DataSet3 accelDataIn, DataSet4 rotVectorData, DataSet3 accelDataOut) {
-        // Arrays to hold the temporary rotation and transposed matrices for each measurement
+    /**
+     * Attempts to eliminate gravity bias from raw accelerometer recording. As of current version, it is not very
+     * successful at its task
+     *
+     * @param accelDataIn   Input accelerometer data to filter
+     * @param rotVectorData Rotation vector data, used to determine gravity vector
+     * @param accelDataOut  Output data set. Can safely reuse input data set to overwrite data
+     * @param gravity       Averaged gravity readings, accurate as of recording start
+     */
+    public static void removeGravityFromRaw(DataSet3 accelDataIn, DataSet4 rotVectorData, DataSet3 accelDataOut, float[] gravity) {
+        // An array to hold the temporary rotation matrix for each measurement
         float[] matrix = new float[16];
         float[] transposed = new float[16];
 
-        // An array to hold rotation vector (indices 0..3), then actual vector and resulting vector (4..7)
-        float[] rv = new float[8];
-        rv[3] = 0f;
-
-        // Now for each acceleration vector rotate it to match world coordinates
-        rotVectorData.resetForInterpolatedRead();
-        for (int i = 0; i < accelDataIn.length; i++) {
-            rotVectorData.getForTime(accelDataIn.times[i], rv);
-            SensorManager.getRotationMatrixFromVector(matrix, rv);
-            rv[0] = accelDataIn.valuesX[i];
-            rv[1] = accelDataIn.valuesY[i];
-            rv[2] = accelDataIn.valuesZ[i];
-            // Transposing rotation matrix also inverts it!
-            Matrix.transposeM(transposed, 0, matrix, 0);
-            Matrix.multiplyMV(rv, 4, transposed, 0, rv, 0);
-            accelDataOut.valuesX[i] = rv[4];
-            accelDataOut.valuesY[i] = rv[5];
-            accelDataOut.valuesZ[i] = rv[6];
-        }
-    }
-
-    /**
-     * Subtracts gravity impact from transformed data
-     *
-     * @param accelDataIn  Acceleration data in world coordinates
-     * @param accelDataOut Data set to write to; it's safe to pass the same data set as input to overwrite it
-     */
-    public static void removeGravity(DataSet3 accelDataIn, DataSet3 accelDataOut) {
-        for (int i = 0; i < accelDataIn.length; i++) {
-            accelDataOut.valuesZ[i] = accelDataIn.valuesZ[i] - SensorManager.STANDARD_GRAVITY;
-        }
-    }
-
-    public static void removeGravityFromRaw(DataSet3 accelDataIn, DataSet4 rotVectorData, DataSet3 accelDataOut) {
-        // Arrays to hold the temporary rotation and transposed matrices for each measurement
-        float[] matrix = new float[16];
-
         // An array to hold rotation vector (indices 0..3), then gravity vector (4..7) and resulting vector (8..11)
         float[] rv = new float[12];
-        rv[4] = 0f;
-        rv[5] = 0f;
-        rv[6] = -SensorManager.STANDARD_GRAVITY;
+
+        // Determine initial gravity vector
+        rv[8] = gravity[0];
+        rv[9] = gravity[1];
+        rv[10] = gravity[2];
+        rotVectorData.getForTime(0, rv);
+        SensorManager.getRotationMatrixFromVector(matrix, rv);
+        // Transposing a rotation matrix is the same as inverting one, but faster
+        Matrix.transposeM(transposed, 0, matrix, 0);
+        Matrix.multiplyMV(rv, 4, transposed, 0, rv, 8);
 
         // Now for each acceleration vector rotate it to match world coordinates
         rotVectorData.resetForInterpolatedRead();
@@ -116,17 +88,9 @@ public final class DataTransformer {
             rotVectorData.getForTime(accelDataIn.times[i], rv);
             SensorManager.getRotationMatrixFromVector(matrix, rv);
             Matrix.multiplyMV(rv, 8, matrix, 0, rv, 4);
-            accelDataOut.valuesX[i] = accelDataIn.valuesX[i] + rv[8];
-            accelDataOut.valuesY[i] = accelDataIn.valuesY[i] + rv[9];
-            accelDataOut.valuesZ[i] = accelDataIn.valuesZ[i] + rv[10];
-        }
-    }
-
-    public static void reduceJitter(DataSet3 accelDataIn, float threshold, DataSet3 accelDataOut) {
-        for (int i = 0; i < accelDataIn.length; i++) {
-            accelDataOut.valuesX[i] = Math.abs(accelDataIn.valuesX[i]) > threshold ? accelDataIn.valuesX[i] : 0f;
-            accelDataOut.valuesY[i] = Math.abs(accelDataIn.valuesY[i]) > threshold ? accelDataIn.valuesY[i] : 0f;
-            accelDataOut.valuesZ[i] = Math.abs(accelDataIn.valuesZ[i]) > threshold ? accelDataIn.valuesZ[i] : 0f;
+            accelDataOut.valuesX[i] = accelDataIn.valuesX[i] - rv[8];
+            accelDataOut.valuesY[i] = accelDataIn.valuesY[i] - rv[9];
+            accelDataOut.valuesZ[i] = accelDataIn.valuesZ[i] - rv[10];
         }
     }
 }

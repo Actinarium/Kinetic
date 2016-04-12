@@ -26,6 +26,7 @@ public class DataRecorder {
     public static final int DEFAULT_RECORDING_TIME_MILLIS = 5000;
     public static final int DEFAULT_SAMPLING_MICROS = 5000;
 
+    public static final int STATUS_FAILURE_NO_SENSOR = -2;
     public static final int STATUS_FAILURE_GENERIC = -1;
     public static final int STATUS_DONE = 0;
     public static final int STATUS_TERMINATED = 1;
@@ -46,10 +47,14 @@ public class DataRecorder {
 
     private Handler mHandler;
     private Runnable mRunnable;
+    private boolean mIsRecording;
 
     private Callback mCallback;
     private int mRecordingTimeMillis;
     private int mSamplingRateMicros;
+
+    private float[] mGravity = new float[3];
+    private static final float ALPHA = 0.8f;
 
     /**
      * Create and initialize a data recorder component.
@@ -64,6 +69,11 @@ public class DataRecorder {
         mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mRotVectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        if (mAccelSensor == null || mGyroSensor == null || mRotVectorSensor == null) {
+            callback.onDataRecordedResult(STATUS_FAILURE_NO_SENSOR, null, null, null, null);
+            return;
+        }
 
         mCallback = callback;
         mRecordingTimeMillis = recordingTimeMillis;
@@ -80,6 +90,10 @@ public class DataRecorder {
         mAccelSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
+                if (!mIsRecording) {
+                    // While the listener is idle, let's adjust gravity
+                    adjustGravity(event);
+                }
                 if (!mAccelDataSet.put(event)) {
                     doStop(STATUS_OUT_OF_BOUNDS);
                 }
@@ -88,9 +102,13 @@ public class DataRecorder {
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Accel accuracy: " + accuracy); }
         };
+
         mGyroSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
+                if (!mIsRecording) {
+                    return;
+                }
                 if (!mGyroDataSet.put(event)) {
                     doStop(STATUS_OUT_OF_BOUNDS);
                 }
@@ -99,9 +117,13 @@ public class DataRecorder {
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) { Log.d(TAG, "Gyro accuracy: " + accuracy); }
         };
+
         mRotVectorSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
+                if (!mIsRecording) {
+                    return;
+                }
                 if (!mRotVectorDataSet.put(event)) {
                     doStop(STATUS_OUT_OF_BOUNDS);
                 }
@@ -113,9 +135,20 @@ public class DataRecorder {
     }
 
     /**
-     * Start recording data. Starts listening on sensors and writing data to respective data sets
+     * Starts listening on sensors. Call this for warm-up. Will not start recording data - call {@link
+     * #startRecording()} for that
      */
-    public void start() {
+    public void startListening() {
+        // todo: enable reporting latency and flush
+        mSensorManager.registerListener(mAccelSensorListener, mAccelSensor, mSamplingRateMicros);
+        mSensorManager.registerListener(mGyroSensorListener, mGyroSensor, mSamplingRateMicros);
+        mSensorManager.registerListener(mRotVectorSensorListener, mRotVectorSensor, mSamplingRateMicros);
+    }
+
+    /**
+     * Start recording data
+     */
+    public void startRecording() {
         // If started, throw exception
         if (mHandler != null || mRunnable != null) {
             throw new IllegalStateException("Cannot start data recorder - it appears to be started already");
@@ -125,13 +158,7 @@ public class DataRecorder {
         mGyroDataSet.reset();
         mRotVectorDataSet.reset();
 
-        // todo: determine initial rotation around X and Y axes (we don't care which direction the device is pointing)
-
-        // Register the listeners
-        // todo: implement delayed reporting (with H/W queue) for KitKat+
-        mSensorManager.registerListener(mAccelSensorListener, mAccelSensor, mSamplingRateMicros);
-        mSensorManager.registerListener(mGyroSensorListener, mGyroSensor, mSamplingRateMicros);
-        mSensorManager.registerListener(mRotVectorSensorListener, mRotVectorSensor, mSamplingRateMicros);
+        mIsRecording = true;
 
         // Register a handler and a runnable to stop listening after the timeout
         mHandler = new Handler();
@@ -140,7 +167,7 @@ public class DataRecorder {
     }
 
     /**
-     * Force stop recording data
+     * Force stop recording data and unregister the listener
      */
     public void stop() {
         doStop(STATUS_TERMINATED);
@@ -150,16 +177,29 @@ public class DataRecorder {
      * Called internally when data recording should be terminated for any reason
      */
     private void doStop(@Status int status) {
+        if (!mIsRecording) {
+            return;
+        }
+
+        mIsRecording = false;
+
         if (mHandler != null && mRunnable != null) {
             mHandler.removeCallbacks(mRunnable);
             mHandler = null;
             mRunnable = null;
         }
+
         mSensorManager.unregisterListener(mAccelSensorListener);
         mSensorManager.unregisterListener(mGyroSensorListener);
         mSensorManager.unregisterListener(mRotVectorSensorListener);
 
-        mCallback.onDataRecordedResult(status, mAccelDataSet, mGyroDataSet, mRotVectorDataSet);
+        mCallback.onDataRecordedResult(status, mAccelDataSet, mGyroDataSet, mRotVectorDataSet, mGravity);
+    }
+
+    private void adjustGravity(SensorEvent event) {
+        mGravity[0] = ALPHA * mGravity[0] + (1 - ALPHA) * event.values[0];
+        mGravity[1] = ALPHA * mGravity[1] + (1 - ALPHA) * event.values[1];
+        mGravity[2] = ALPHA * mGravity[2] + (1 - ALPHA) * event.values[2];
     }
 
     /**
@@ -175,12 +215,13 @@ public class DataRecorder {
          * @param accelData     Holds recorded data for accelerometer values
          * @param gyroData      Holds recorded data for gyroscope values
          * @param rotVectorData Holds recorded data for rotation vector values
+         * @param gravity       Initial gravity as of the start of recording
          */
-        void onDataRecordedResult(@Status int status, DataSet3 accelData, DataSet3 gyroData, DataSet4 rotVectorData);
+        void onDataRecordedResult(@Status int status, DataSet3 accelData, DataSet3 gyroData, DataSet4 rotVectorData, float[] gravity);
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATUS_DONE, STATUS_TERMINATED, STATUS_OUT_OF_BOUNDS, STATUS_FAILURE_GENERIC})
+    @IntDef({STATUS_DONE, STATUS_TERMINATED, STATUS_OUT_OF_BOUNDS, STATUS_FAILURE_GENERIC, STATUS_FAILURE_NO_SENSOR})
     public @interface Status {
     }
 

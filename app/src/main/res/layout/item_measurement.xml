@@ -40,12 +40,12 @@
 
     </LinearLayout>
 
-    <com.actinarium.kinetic.KineticChart
+    <com.actinarium.kinetic.ui.KineticChart
             android:id="@+id/chart"
             android:layout_width="match_parent"
             android:layout_height="@dimen/chart_height"
             android:paddingTop="8dp"
-            android:paddingStart="18dp"
+            android:paddingStart="16dp"
             android:paddingBottom="16dp"
             android:paddingEnd="16dp"
             app:lineColor="@color/chartLine"

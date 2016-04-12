@@ -15,6 +15,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="@color/colorAccent"
+                android:elevation="@dimen/elevation_magnitude"
                 android:layout_gravity="center"/>
 
     </FrameLayout>
@@ -66,23 +67,31 @@
             android:background="@android:color/white"
             android:elevation="8dp">
 
-        <!-- todo: static controls-->
-        <LinearLayout
+        <!-- static controls-->
+
+        <SeekBar
+                android:theme="@style/AppTheme.DimSeekBar"
+                android:id="@+id/trim_start"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="24dp"
+                android:layout_marginTop="12dp"
+                android:progress="0"
+                android:saveEnabled="false"
+                android:max="100000"/>
 
-            <Button
-                    android:id="@+id/save"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Save for X"/>
-
-        </LinearLayout>
+        <SeekBar
+                android:theme="@style/AppTheme.DimSeekBar"
+                android:id="@+id/trim_end"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:progress="0"
+                android:saveEnabled="false"
+                android:scaleX="-1"
+                android:max="100000"/>
 
         <View
                 android:layout_width="match_parent"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="11dp"
                 android:layout_height="1dp"
                 android:background="@color/hairline"/>
 

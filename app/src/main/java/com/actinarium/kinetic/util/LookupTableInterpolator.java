@@ -38,11 +38,10 @@ public class LookupTableInterpolator implements Interpolator {
 
     @Override
     public float getInterpolation(float input) {
-        if (input >= 1.0f) {
-            return 1.0f;
-        }
-        if (input <= 0f) {
-            return 0f;
+        if (input > 1.0f) {
+            input = 1.0f;
+        } else if (input < 0f) {
+            input = 0f;
         }
 
         // Calculate left cell index (length - 2 at max)
@@ -55,10 +54,6 @@ public class LookupTableInterpolator implements Interpolator {
 
         // Linearly interpolate between the table values
         float value = mValues[index];
-        value = value + weight * (mValues[index + 1] - value);
-
-        // todo: normalize value given provided bounds
-
-        return value;
+        return mValueAdd + (value + weight * (mValues[index + 1] - value)) * mValueMult;
     }
 }
