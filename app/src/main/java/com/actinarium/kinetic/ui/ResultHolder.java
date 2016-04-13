@@ -98,37 +98,53 @@ public class ResultHolder implements AdapterView.OnItemSelectedListener, Compoun
         }
     }
 
-    public void setData(long[] times, float[] values, int length) {
+    public void setData(long[] times, float[] values, int length, float linearMagnitude) {
         mLength = length;
 
-        // Calculate real min and max
-        float min = values[0];
-        float max = values[0];
+        // Calculate real min and max - used to normalize interpolator values
+        float realMin = values[0];
+        float realMax = values[0];
         for (int i = 1; i < length; i++) {
-            if (values[i] < min) {
-                min = values[i];
-            } else if (values[i] > max) {
-                max = values[i];
+            if (values[i] < realMin) {
+                realMin = values[i];
+            } else if (values[i] > realMax) {
+                realMax = values[i];
             }
         }
 
         mInterpolator.setData(values);
         mInterpolator.setRange(0, mLength - 1);
-        mInterpolator.setTransformation(0f, 1 / (max - min));
-
-        // todo: calculate magnitude for interpolation
-        if (mIsRotation) {
-            // Now, if that's rotation values, I want to make them a multiple of pi/2 for easier application
-//            min = (float) (Math.floor(min / Math.PI * 2.0) * Math.PI / 2);
-//            max = (float) (Math.ceil(max / Math.PI * 2.0) * Math.PI / 2);
+        if (realMax > -realMin && realMax > 0) {
+            // Let the multiplier be the negative of the maximum value (so that maximum value maps to 1f)
+            mInterpolator.setTransformation(0f, 1 / realMax);
+        } else if (realMin < 0) {
+            // If we're all about negative values, let the multiplier be -minimum (so that minimum value is -1f)
+            mInterpolator.setTransformation(0f, 1 / -realMin);
         } else {
-            // Or if it's offset values, I want to make the minimum range of -5cm..5cm
-//            min = Math.min(min, -0.05f);
-//            max = Math.max(max, 0.05f);
+            // Both min and max are zero. Multiplier is 1
+            mInterpolator.setTransformation(0f, 1f);
+        }
+
+        // Determine chart min/max - we don't want to look at over-magnified jitter
+        float chartMin, chartMax;
+        // And also determine magnitude for the preview
+        if (mIsRotation) {
+            // If those are rotation values, make them a multiple of pi/2
+            chartMin = (float) (Math.floor(realMin / Math.PI * 2.0) * Math.PI / 2);
+            chartMax = (float) (Math.ceil(realMax / Math.PI * 2.0) * Math.PI / 2);
+            // Magnitude will be the exact value as a maximum (converted to degrees)
+            mMagnitude = (float) (mInterpolator.getMultiplier() * 180 / Math.PI);
+        } else {
+            // If those are offset values, I want to make the minimum range of -5cm..5cm
+            chartMin = Math.min(realMin, -0.05f);
+            chartMax = Math.max(realMax, 0.05f);
+            // Magnitude is always the constant
+            // todo: no, it should be determined proportionally based on what's mapped to X / Y
+            mMagnitude = linearMagnitude;
         }
         mMagnitude = 100f;
 
-        mChart.setData(times, values, length, min, max);
+        mChart.setData(times, values, length, chartMin, chartMax);
     }
 
     public void setTrim(float trimStart, float trimEnd) {
@@ -179,7 +195,6 @@ public class ResultHolder implements AdapterView.OnItemSelectedListener, Compoun
 
     public interface Host {
         void onResultToggle(int id, boolean isEnabled);
-
         void onAnimatorSelected(int id, int animator);
     }
 }

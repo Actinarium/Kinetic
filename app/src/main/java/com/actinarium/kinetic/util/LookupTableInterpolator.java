@@ -74,6 +74,10 @@ public class LookupTableInterpolator implements Interpolator {
         mValueMult = valueMult;
     }
 
+    public float getMultiplier() {
+        return mValueMult;
+    }
+
 //    public void setData(float[] values, int length, float valueAdd, float valueMult)
 
     @Override

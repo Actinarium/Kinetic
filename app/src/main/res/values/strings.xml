@@ -37,6 +37,7 @@
         <item>Rotation — Yaw</item>
     </string-array>
     <string name="align_start_end">Align start and end</string>
+    <string name="preview_this_as">Preview this as:</string>
     <string-array name="preview_options">
         <item>None</item>
         <item>X axis</item>

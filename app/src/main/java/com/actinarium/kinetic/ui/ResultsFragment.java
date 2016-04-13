@@ -97,7 +97,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
         // Preview animation
         View animatedView = view.findViewById(R.id.preview_sprite);
-        int linearMagnitude = getResources().getDimensionPixelOffset(R.dimen.linear_magnitude);
+        float linearMagnitude = getResources().getDimension(R.dimen.linear_magnitude);
         mFullDuration = (accelData.times[accelData.length - 1] - accelData.times[0]) / 1000000L;
         mPreviewHolder = new PreviewHolder(animatedView);
         mPreviewHolder.setDuration(mFullDuration);
@@ -129,12 +129,12 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         resultsContainer.addView(export);
         mEpithets = getResources().getStringArray(R.array.epithets);
 
-        mHolders[0].setData(accelData.times, accelData.valuesX, accelData.length);
-        mHolders[1].setData(accelData.times, accelData.valuesY, accelData.length);
-        mHolders[2].setData(accelData.times, accelData.valuesZ, accelData.length);
-        mHolders[3].setData(gyroData.times, gyroData.valuesX, gyroData.length);
-        mHolders[4].setData(gyroData.times, gyroData.valuesY, gyroData.length);
-        mHolders[5].setData(gyroData.times, gyroData.valuesZ, gyroData.length);
+        mHolders[0].setData(accelData.times, accelData.valuesX, accelData.length, linearMagnitude);
+        mHolders[1].setData(accelData.times, accelData.valuesY, accelData.length, linearMagnitude);
+        mHolders[2].setData(accelData.times, accelData.valuesZ, accelData.length, linearMagnitude);
+        mHolders[3].setData(gyroData.times, gyroData.valuesX, gyroData.length, 0f);
+        mHolders[4].setData(gyroData.times, gyroData.valuesY, gyroData.length, 0f);
+        mHolders[5].setData(gyroData.times, gyroData.valuesZ, gyroData.length, 0f);
 
         // Wire up animators to results
         for (int i = 0; i < mMap.length; i++) {
