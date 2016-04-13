@@ -23,7 +23,7 @@ public class DataRecorder {
 
     private static final String TAG = "DataRecorder";
 
-    public static final int DEFAULT_RECORDING_TIME_MILLIS = 5000;
+    public static final int DEFAULT_RECORDING_TIME_MILLIS = 10000;
     public static final int DEFAULT_SAMPLING_MICROS = 5000;
 
     public static final int STATUS_FAILURE_NO_SENSOR = -2;
@@ -65,6 +65,8 @@ public class DataRecorder {
      * @param samplingRateMicros  Sensor sampling rate in micros, e.g. {@link #DEFAULT_SAMPLING_MICROS}
      */
     public DataRecorder(Context context, Callback callback, int recordingTimeMillis, int samplingRateMicros) {
+        mCallback = callback;
+
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mAccelSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -75,7 +77,6 @@ public class DataRecorder {
             return;
         }
 
-        mCallback = callback;
         mRecordingTimeMillis = recordingTimeMillis;
         mSamplingRateMicros = samplingRateMicros;
 
@@ -149,6 +150,12 @@ public class DataRecorder {
      * Start recording data
      */
     public void startRecording() {
+        // If trying to record when there are no sensors
+        if (mAccelSensor == null || mGyroSensor == null || mRotVectorSensor == null) {
+            mCallback.onDataRecordedResult(STATUS_FAILURE_NO_SENSOR, null, null, null, null);
+            return;
+        }
+
         // If started, throw exception
         if (mHandler != null || mRunnable != null) {
             throw new IllegalStateException("Cannot start data recorder - it appears to be started already");

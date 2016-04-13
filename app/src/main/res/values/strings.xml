@@ -3,16 +3,15 @@
     <string name="app_subtitle">A proof of concept\nfor authentic motion recorder</string>
 
     <string name="app_howto">1. Press Record button
-        \n2. Move the device (up to 5 seconds)
+        \n2. Move the device (up to 10 seconds)
         \n3. Preview and adjust the result
         \n4. Export as Java interpolator code</string>
     <string name="app_disclaimer">Experimental: expect highly inaccurate readings</string>
 
-    <string name="sensor_error">The device doesn’t have necessary sensors.</string>
+    <string name="sensor_error">The device doesn’t have required sensors</string>
     <string name="app_error">Something went wrong. Please try again.</string>
 
     <string name="toggle_measurement">Toggle measurement</string>
-    <string name="interpolator_range">Interpolator 0 and 1:</string>
     <string-array name="result_titles">
         <item>Offset — X</item>
         <item>Offset — Y</item>
@@ -20,6 +19,13 @@
         <item>Rotation — Pitch</item>
         <item>Rotation — Roll</item>
         <item>Rotation — Yaw</item>
+    </string-array>
+    <string name="align_start_end">Align start and end</string>
+    <string-array name="preview_options">
+        <item>None</item>
+        <item>X axis</item>
+        <item>Y axis</item>
+        <item>Rotation</item>
     </string-array>
 
     <string name="dialog_discard_message">Discard this recording?</string>

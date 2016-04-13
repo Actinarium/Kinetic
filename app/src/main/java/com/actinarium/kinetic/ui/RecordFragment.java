@@ -1,13 +1,17 @@
 package com.actinarium.kinetic.ui;
 
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import com.actinarium.kinetic.R;
 import com.actinarium.kinetic.pipeline.DataRecorder;
@@ -28,6 +32,8 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
     private boolean mIsRecording;
 
     private FloatingActionButton mRecordButton;
+    private Drawable mProgress;
+    private ObjectAnimator mAnimator;
 
     public RecordFragment() {
         // Required empty public constructor
@@ -45,6 +51,9 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
 
         mRecordButton = (FloatingActionButton) view.findViewById(R.id.record);
         mRecordButton.setOnClickListener(this);
+        FrameLayout fabHolder = (FrameLayout) view.findViewById(R.id.fab_holder);
+        mProgress = fabHolder.getForeground();
+        mProgress.setLevel(0);
 
         mRecorder = new DataRecorder(getContext(), this, DataRecorder.DEFAULT_RECORDING_TIME_MILLIS, DataRecorder.DEFAULT_SAMPLING_MICROS);
 
@@ -70,7 +79,15 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
             mIsRecording = true;
             mRecordButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause));
             mRecorder.startRecording();
+
+            mAnimator = ObjectAnimator.ofInt(mProgress, "level", 0, 10000)
+                    .setDuration(DataRecorder.DEFAULT_RECORDING_TIME_MILLIS);
+            mAnimator.setInterpolator(new LinearInterpolator());
+            mAnimator.start();
         } else {
+            // End animation quickly
+            mAnimator.end();
+
             // Stop recording - the drawable and the boolean will be updated in a callback method
             mRecorder.stop();
         }
@@ -83,9 +100,9 @@ public class RecordFragment extends Fragment implements View.OnClickListener, Da
         mRecordButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_record));
 
         if (status == DataRecorder.STATUS_FAILURE_NO_SENSOR) {
-            Toast.makeText(getContext(), R.string.sensor_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.sensor_error, Toast.LENGTH_LONG).show();
         } else if (status < 0) {
-            Toast.makeText(getContext(), R.string.app_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.app_error, Toast.LENGTH_LONG).show();
         } else {
             // Try to remove gravity from raw readings
             DataTransformer.removeGravityFromRaw(accelData, rotVectorData, accelData, gravity);

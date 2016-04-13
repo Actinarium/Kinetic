@@ -2,7 +2,6 @@ package com.actinarium.kinetic.ui;
 
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import com.actinarium.kinetic.R;
@@ -13,7 +12,7 @@ import com.actinarium.kinetic.util.LookupTableInterpolator;
  *
  * @author Paul Danyliuk
  */
-public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
+public class ResultHolder {
 
     private final int mId;
     private final Host mHost;
@@ -24,8 +23,6 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
 
     private final Switch mToggle;
     private final KineticChart mChart;
-    private final SeekBar mRangeZero;
-    private final SeekBar mRangeOne;
     private final LookupTableInterpolator mInterpolator;
     private int mLength;
 
@@ -47,8 +44,6 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
         titleLabel.setText(title);
 
         mChart = (KineticChart) rootView.findViewById(R.id.chart);
-        mRangeZero = (SeekBar) rootView.findViewById(R.id.range_0);
-        mRangeOne = (SeekBar) rootView.findViewById(R.id.range_1);
 
         final View rangeHolder = rootView.findViewById(R.id.range_holder);
 
@@ -66,9 +61,6 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
                 mHost.onResultToggle(mId, isChecked);
             }
         });
-
-        mRangeZero.setOnSeekBarChangeListener(this);
-        mRangeOne.setOnSeekBarChangeListener(this);
 
         mInterpolator = new LookupTableInterpolator();
     }
@@ -113,27 +105,6 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
     public LookupTableInterpolator getInterpolator() {
         return mInterpolator;
     }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (seekBar == mRangeZero) {
-            if (fromUser) {
-                mIsRangeZeroModified = true;
-            }
-            // todo: update chart zero line
-        } else if (seekBar == mRangeOne) {
-            if (fromUser) {
-                mIsRangeOneModified = true;
-            }
-            // todo: update chart one line
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) { /* no-op */ }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) { /* no-op */ }
 
     public interface Host {
         void onResultToggle(int id, boolean enabled);
