@@ -2,6 +2,8 @@
 
 Kinetic is a small proof of concept app that records device motion and translates it into Java code (interpolators for Android SDK).
 
+[Video demo](https://www.youtube.com/watch?v=OT7uTqNy30M)
+
 It’s a very experimental app in an early stage developed for the [Android Experiments I/O challenge][challenge].
 So far it records rotation somewhat precisely, and offset recording is a subject to very strong interference (jitter, drift etc).
 
