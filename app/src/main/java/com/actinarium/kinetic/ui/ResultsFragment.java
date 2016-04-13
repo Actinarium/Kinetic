@@ -39,6 +39,10 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private PreviewHolder mPreviewHolder;
     private SeekBar mTrimStart;
     private SeekBar mTrimEnd;
+    private int mStartProgress;
+    private int mEndProgress;
+    private int mMax;
+    private long mFullDuration;
 
     public ResultsFragment() {
         // Required empty public constructor
@@ -71,15 +75,16 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         View animatedView = view.findViewById(R.id.preview_sprite);
         int linearMagnitude = getResources().getDimensionPixelOffset(R.dimen.linear_magnitude);
         int elevationMagnitude = getResources().getDimensionPixelOffset(R.dimen.elevation_magnitude);
-        int animDuration = (int) ((mAccelData.times[mAccelData.length - 1] - mAccelData.times[0]) / 1000000L);
+        mFullDuration = (mAccelData.times[mAccelData.length - 1] - mAccelData.times[0]) / 1000000L;
         mPreviewHolder = new PreviewHolder(animatedView, mAccelData, mGyroData, linearMagnitude, elevationMagnitude, 180);
-        mPreviewHolder.setDuration(animDuration);
+        mPreviewHolder.setDuration(mFullDuration);
 
         // Trim range
         mTrimStart = (SeekBar) view.findViewById(R.id.trim_start);
         mTrimStart.setOnSeekBarChangeListener(this);
         mTrimEnd = (SeekBar) view.findViewById(R.id.trim_end);
         mTrimEnd.setOnSeekBarChangeListener(this);
+        mMax = mTrimStart.getMax();
 
         String[] resultTitles = getResources().getStringArray(R.array.result_titles);
         ViewGroup resultsContainer = (ViewGroup) view.findViewById(R.id.item_container);
@@ -178,7 +183,21 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        mStartProgress = mTrimStart.getProgress();
+        mEndProgress = mTrimEnd.getProgress();
 
+        // If one pushes another
+        if (mStartProgress + mEndProgress >= mMax) {
+            if (seekBar == mTrimStart) {
+                mTrimEnd.setProgress(mMax - mStartProgress);
+            } else {
+                mTrimStart.setProgress(mMax - mEndProgress);
+            }
+        }
+
+        for (ResultHolder h : mHolders) {
+            h.setTrim(mStartProgress / (float) mMax, mEndProgress / (float) mMax);
+        }
     }
 
     @Override
@@ -188,7 +207,11 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mPreviewHolder.startAnimation();
+        if (mStartProgress + mEndProgress < mMax) {
+            final long newDuration = mFullDuration * (mMax - mStartProgress - mEndProgress) / mMax;
+            mPreviewHolder.setDuration(newDuration);
+            mPreviewHolder.startAnimation();
+        }
     }
 
     public interface Host {

@@ -22,12 +22,14 @@ public class KineticChart extends View {
     private long[] mTimes;
     private float[] mValues;
     private int mLength;
-    private float mMin;
-    private float mMax;
-    private float mStepY;
-    private long mStepX;
+    private float mMinY;
+    private float mMaxY;
+    private float mTrimStart;
+    private float mTrimEnd;
 
     // Drawing data
+    private int mLineColor;
+    private int mDimLineColor;
     private Rect mChartArea;
     private Paint mLinePaint;
     private Paint mAxisPaint;
@@ -55,8 +57,10 @@ public class KineticChart extends View {
         TypedArray array = context.getTheme().obtainStyledAttributes(attrs, R.styleable.KineticChart, defStyleAttr, 0);
 
         mLinePaint.setStrokeWidth(array.getDimension(R.styleable.KineticChart_lineThickness, 0));
-        mLinePaint.setColor(array.getColor(R.styleable.KineticChart_lineColor, Color.BLACK));
-        mAxisPaint.setColor(array.getColor(R.styleable.KineticChart_axisColor, Color.DKGRAY));
+        mLineColor = array.getColor(R.styleable.KineticChart_lineColor, Color.BLACK);
+        mDimLineColor = array.getColor(R.styleable.KineticChart_dimLineColor, Color.DKGRAY);
+        mLinePaint.setColor(mLineColor);
+        mAxisPaint.setColor(array.getColor(R.styleable.KineticChart_axisColor, Color.GRAY));
         mAxisThickness = array.getDimensionPixelSize(R.styleable.KineticChart_axisThickness, 1);
 
         array.recycle();
@@ -110,7 +114,29 @@ public class KineticChart extends View {
             // Draw path
             canvas.save();
             canvas.translate(mChartArea.left, mZeroY);
-            canvas.drawPath(mPath, mLinePaint);
+
+            if (mTrimStart != 0 || mTrimEnd != 0) {
+                final int width = mChartArea.width();
+                // Gray parts
+                mLinePaint.setColor(mDimLineColor);
+                canvas.save();
+                canvas.clipRect(0, -mZeroY, width * mTrimStart, Float.MAX_VALUE);
+                canvas.drawPath(mPath, mLinePaint);
+                canvas.restore();
+                canvas.save();
+                canvas.clipRect(width * (1 - mTrimEnd), -mZeroY, width, Float.MAX_VALUE);
+                canvas.drawPath(mPath, mLinePaint);
+                canvas.restore();
+
+                mLinePaint.setColor(mLineColor);
+                canvas.save();
+                canvas.clipRect(width * mTrimStart, -mZeroY, width * (1 - mTrimEnd), Float.MAX_VALUE);
+                canvas.drawPath(mPath, mLinePaint);
+                canvas.restore();
+            } else {
+                canvas.drawPath(mPath, mLinePaint);
+            }
+
             canvas.restore();
         }
 
@@ -125,22 +151,32 @@ public class KineticChart extends View {
      * @param times  Timestamps in nanos, for X axis
      * @param values Sensor readings (pre-transformed if required), for Y axis
      * @param length Number of entries to use from times and values arrays
-     * @param min    Value to use as a minimum
-     * @param max    Value to use as a maximum
-     * @param stepX  Horizontal step of the grid
-     * @param stepY  Vertical step of the grid
+     * @param minY   Value to use as a minimum
+     * @param maxY   Value to use as a maximum
      */
-    public void setData(long[] times, float[] values, int length, float min, float max, long stepX, float stepY) {
+    public void setData(long[] times, float[] values, int length, float minY, float maxY) {
         mTimes = times;
         mValues = values;
         mLength = length;
-        mMin = min;
-        mMax = max;
-        mStepY = stepY;
-        mStepX = stepX;
+        mMinY = minY;
+        mMaxY = maxY;
         if (!mChartArea.isEmpty()) {
             recalculateChartMetrics();
             recalculateChartPath();
+            invalidate();
+        }
+    }
+
+    /**
+     * Tell the chart how many of it from the start and the end to trim out
+     *
+     * @param trimStart Fraction to trim from the start, from 0f to 1f
+     * @param trimEnd   Fraction to trim from the end, from 0f to 1f
+     */
+    public void setTrim(float trimStart, float trimEnd) {
+        mTrimStart = trimStart;
+        mTrimEnd = trimEnd;
+        if (!mChartArea.isEmpty()) {
             invalidate();
         }
     }
@@ -158,9 +194,9 @@ public class KineticChart extends View {
      */
     private void recalculateChartMetrics() {
         // Multiplier for transforming values into chart coords
-        if (mMax != mMin) {
+        if (mMaxY != mMinY) {
             // Subtracting max from min to invert Y axis (canvas' Y starts at the top)
-            mMultY = mChartArea.height() / (mMin - mMax);
+            mMultY = mChartArea.height() / (mMinY - mMaxY);
         }
 
         // Division factor for transforming times into chart x coords
@@ -171,7 +207,7 @@ public class KineticChart extends View {
             mDivX = 1L;
         }
 
-        mZeroY = mChartArea.top + mChartArea.height() * mMax / (mMax - mMin);
+        mZeroY = mChartArea.top + mChartArea.height() * mMaxY / (mMaxY - mMinY);
     }
 
 

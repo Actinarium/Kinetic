@@ -81,7 +81,11 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
             }
         }
 
-        mChart.setData(times, values, length, min, max, 0, 0);
+        mChart.setData(times, values, length, min, max);
+    }
+
+    public void setTrim(float trimStart, float trimEnd) {
+        mChart.setTrim(trimStart, trimEnd);
     }
 
     @Override

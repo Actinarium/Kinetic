@@ -6,7 +6,7 @@
         \n2. Move the device (up to 5 seconds)
         \n3. Preview and adjust the result
         \n4. Export as Java interpolator code</string>
-    <string name="app_disclaimer">Experimental: expect highly inaccurate results</string>
+    <string name="app_disclaimer">Experimental: expect highly inaccurate readings</string>
 
     <string name="sensor_error">The device doesn’t have necessary sensors.</string>
     <string name="app_error">Something went wrong. Please try again.</string>

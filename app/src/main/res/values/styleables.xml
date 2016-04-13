@@ -3,6 +3,7 @@
 
     <declare-styleable name="KineticChart">
         <attr name="lineColor" format="color" />
+        <attr name="dimLineColor" format="color" />
         <attr name="lineThickness" format="dimension" />
         <attr name="axisColor" format="color" />
         <attr name="axisThickness" format="dimension" />
