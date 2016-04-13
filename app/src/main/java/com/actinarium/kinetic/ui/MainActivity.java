@@ -12,10 +12,13 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
     private static final String ARG_ACCEL = "com.actinarium.kinetic.bundle.ACCEL";
     private static final String ARG_GYRO = "com.actinarium.kinetic.bundle.GYRO";
     private static final String ARG_RV = "com.actinarium.kinetic.bundle.RV";
+    private static final String ARG_RHS = "com.actinarium.kinetic.bundle.RHS";
 
     private DataSet3 mAccelData;
     private DataSet3 mGyroData;
     private DataSet4 mRotVectorData;
+
+    private boolean[] mResultHoldersState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +29,10 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
             mAccelData = savedInstanceState.getParcelable(ARG_ACCEL);
             mGyroData = savedInstanceState.getParcelable(ARG_GYRO);
             mRotVectorData = savedInstanceState.getParcelable(ARG_RV);
+            mResultHoldersState = savedInstanceState.getBooleanArray(ARG_RHS);
             return;
+        } else {
+            mResultHoldersState = new boolean[]{true, true, true, true, true, true};
         }
 
         getSupportFragmentManager()
@@ -65,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
     }
 
     @Override
+    public boolean[] getResultHoldersState() {
+        return mResultHoldersState;
+    }
+
+    @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(ResultsFragment.TAG);
         if (fragment instanceof ResultsFragment) {
@@ -80,5 +91,6 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
         outState.putParcelable(ARG_ACCEL, mAccelData);
         outState.putParcelable(ARG_GYRO, mGyroData);
         outState.putParcelable(ARG_RV, mRotVectorData);
+        outState.putBooleanArray(ARG_RHS, mResultHoldersState);
     }
 }

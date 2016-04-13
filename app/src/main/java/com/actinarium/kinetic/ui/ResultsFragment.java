@@ -41,6 +41,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private DataSet3 mGyroData;
 
     private ResultHolder[] mHolders = new ResultHolder[6];
+
     private PreviewHolder mPreviewHolder;
     private SeekBar mTrimStart;
     private SeekBar mTrimEnd;
@@ -48,6 +49,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private int mEndProgress;
     private int mMax;
     private long mFullDuration;
+
     private String[] mEpithets;
 
     public ResultsFragment() {
@@ -93,11 +95,12 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         mMax = mTrimStart.getMax();
 
         String[] resultTitles = getResources().getStringArray(R.array.result_titles);
+        boolean[] resultState = mHost.getResultHoldersState();
         ViewGroup resultsContainer = (ViewGroup) view.findViewById(R.id.item_container);
         for (int i = 0; i < 6; i++) {
             View item = inflater.inflate(R.layout.item_measurement, resultsContainer, false);
             resultsContainer.addView(item);
-            mHolders[i] = new ResultHolder(i, this, item, resultTitles[i], i >= 3);
+            mHolders[i] = new ResultHolder(i, this, item, resultTitles[i], i >= 3, resultState[i]);
         }
 
         Button export = (Button) inflater.inflate(R.layout.item_export_button, resultsContainer, false);
@@ -194,6 +197,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
     @Override
     public void onResultToggle(int id, boolean enabled) {
+        mHost.getResultHoldersState()[id] = enabled;
         switch (id) {
             case RESULT_OFFSET_X:
                 mPreviewHolder.stopAnimation();
@@ -265,10 +269,14 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
     public interface Host {
         DataSet3 getAccelData();
-
         DataSet3 getGyroData();
-
         void onRecordingDiscarded();
+
+        /**
+         * Get reference to the array that remembers enabled/disabled holders between recordings
+         * @return reference to the array, editable
+         */
+        boolean[] getResultHoldersState();
     }
 
 }

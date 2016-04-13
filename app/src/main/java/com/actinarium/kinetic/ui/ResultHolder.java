@@ -34,7 +34,7 @@ public class ResultHolder {
      * @param title      Title to display for this item
      * @param isRotation If this chart is for rotation data as opposed to offset data
      */
-    public ResultHolder(int id, Host host, View rootView, String title, boolean isRotation) {
+    public ResultHolder(int id, Host host, View rootView, String title, boolean isRotation, boolean isEnabled) {
         mId = id;
         mHost = host;
         mTitle = title;
@@ -61,6 +61,7 @@ public class ResultHolder {
                 mHost.onResultToggle(mId, isChecked);
             }
         });
+        mToggle.setChecked(isEnabled);
 
         mInterpolator = new LookupTableInterpolator();
     }
