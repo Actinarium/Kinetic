@@ -37,8 +37,6 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private static final int RESULT_ROT_YAW = 5;
 
     private Host mHost;
-    private DataSet3 mAccelData;
-    private DataSet3 mGyroData;
 
     private ResultHolder[] mHolders = new ResultHolder[6];
 
@@ -51,6 +49,8 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private long mFullDuration;
 
     private String[] mEpithets;
+    private boolean[] mResultEnabledStates;
+    private int[] mMap;
 
     public ResultsFragment() {
         // Required empty public constructor
@@ -66,8 +66,8 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_results, container, false);
 
-        mAccelData = mHost.getAccelData();
-        mGyroData = mHost.getGyroData();
+        DataSet3 accelData = mHost.getAccelData();
+        DataSet3 gyroData = mHost.getGyroData();
 
         // Discard button (X)
         ImageButton discard = (ImageButton) view.findViewById(R.id.discard);
@@ -82,9 +82,8 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         // Preview animation
         View animatedView = view.findViewById(R.id.preview_sprite);
         int linearMagnitude = getResources().getDimensionPixelOffset(R.dimen.linear_magnitude);
-        int elevationMagnitude = getResources().getDimensionPixelOffset(R.dimen.elevation_magnitude);
-        mFullDuration = (mAccelData.times[mAccelData.length - 1] - mAccelData.times[0]) / 1000000L;
-        mPreviewHolder = new PreviewHolder(animatedView, mAccelData, mGyroData, linearMagnitude, elevationMagnitude, 180);
+        mFullDuration = (accelData.times[accelData.length - 1] - accelData.times[0]) / 1000000L;
+        mPreviewHolder = new PreviewHolder(animatedView);
         mPreviewHolder.setDuration(mFullDuration);
 
         // Trim range
@@ -95,12 +94,13 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         mMax = mTrimStart.getMax();
 
         String[] resultTitles = getResources().getStringArray(R.array.result_titles);
-        boolean[] resultState = mHost.getResultHoldersState();
+        mResultEnabledStates = mHost.getResultHoldersState();
+        mMap = mHost.getHolderToAnimatorMap();
         ViewGroup resultsContainer = (ViewGroup) view.findViewById(R.id.item_container);
         for (int i = 0; i < 6; i++) {
             View item = inflater.inflate(R.layout.item_measurement, resultsContainer, false);
             resultsContainer.addView(item);
-            mHolders[i] = new ResultHolder(i, this, item, resultTitles[i], i >= 3, resultState[i]);
+            mHolders[i] = new ResultHolder(i, this, item, resultTitles[i], i >= 3, mResultEnabledStates[i], mMap[i]);
         }
 
         Button export = (Button) inflater.inflate(R.layout.item_export_button, resultsContainer, false);
@@ -113,26 +113,26 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         resultsContainer.addView(export);
         mEpithets = getResources().getStringArray(R.array.epithets);
 
-        setData();
+        mHolders[0].setData(accelData.times, accelData.valuesX, accelData.length);
+        mHolders[1].setData(accelData.times, accelData.valuesY, accelData.length);
+        mHolders[2].setData(accelData.times, accelData.valuesZ, accelData.length);
+        mHolders[3].setData(gyroData.times, gyroData.valuesX, gyroData.length);
+        mHolders[4].setData(gyroData.times, gyroData.valuesY, gyroData.length);
+        mHolders[5].setData(gyroData.times, gyroData.valuesZ, gyroData.length);
+
+        // Wire up animators to results
+        for (int i = 0; i < mMap.length; i++) {
+            final int animator = mMap[i];
+            if (animator != PreviewHolder.NO_ANIMATOR) {
+                // This holder is mapped to an animator. Inject result data into animation holder
+                final ResultHolder holder = mHolders[i];
+                mPreviewHolder.setInterpolator(animator, holder.getInterpolator(), holder.getMagnitude());
+                mPreviewHolder.setEnabled(animator, holder.isEnabled());
+            }
+        }
         mPreviewHolder.startAnimation();
 
         return view;
-    }
-
-    private void setData() {
-        mHolders[0].setData(mAccelData.times, mAccelData.valuesX, mAccelData.length);
-        mHolders[1].setData(mAccelData.times, mAccelData.valuesY, mAccelData.length);
-        mHolders[2].setData(mAccelData.times, mAccelData.valuesZ, mAccelData.length);
-        mHolders[3].setData(mGyroData.times, mGyroData.valuesX, mGyroData.length);
-        mHolders[4].setData(mGyroData.times, mGyroData.valuesY, mGyroData.length);
-        mHolders[5].setData(mGyroData.times, mGyroData.valuesZ, mGyroData.length);
-
-        mPreviewHolder.setInterpolators(
-                mHolders[0].getInterpolator(),
-                mHolders[1].getInterpolator(),
-                mHolders[2].getInterpolator(),
-                mHolders[5].getInterpolator()
-        );
     }
 
     /**
@@ -196,41 +196,57 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     }
 
     @Override
-    public void onResultToggle(int id, boolean enabled) {
-        mHost.getResultHoldersState()[id] = enabled;
-        switch (id) {
-            case RESULT_OFFSET_X:
+    public void onResultToggle(int id, boolean isEnabled) {
+        mResultEnabledStates[id] = isEnabled;
+        // If there's an animator mapped to this result, enable/disable it
+        int ourAnimator = mMap[id];
+        if (ourAnimator != PreviewHolder.NO_ANIMATOR) {
+            mPreviewHolder.stopAnimation();
+            mPreviewHolder.setEnabled(ourAnimator, isEnabled);
+            mPreviewHolder.startAnimation();
+        }
+    }
+
+    @Override
+    public void onAnimatorSelected(int id, int animator) {
+        // If selecting no animator, should unbind
+        if (animator == PreviewHolder.NO_ANIMATOR) {
+            // If there was an animator, should disable one
+            int prevAnimator = mMap[id];
+            if (prevAnimator != PreviewHolder.NO_ANIMATOR) {
                 mPreviewHolder.stopAnimation();
-                mPreviewHolder.setStatus(
-                        enabled, mPreviewHolder.isYEnabled(),
-                        mPreviewHolder.isZEnabled(), mPreviewHolder.isRotationEnabled()
-                );
+                mPreviewHolder.setEnabled(prevAnimator, false);
                 mPreviewHolder.startAnimation();
-                break;
-            case RESULT_OFFSET_Y:
-                mPreviewHolder.stopAnimation();
-                mPreviewHolder.setStatus(
-                        mPreviewHolder.isXEnabled(), enabled,
-                        mPreviewHolder.isZEnabled(), mPreviewHolder.isRotationEnabled()
-                );
-                mPreviewHolder.startAnimation();
-                break;
-            case RESULT_OFFSET_Z:
-                mPreviewHolder.stopAnimation();
-                mPreviewHolder.setStatus(
-                        mPreviewHolder.isXEnabled(), mPreviewHolder.isYEnabled(),
-                        enabled, mPreviewHolder.isRotationEnabled()
-                );
-                mPreviewHolder.startAnimation();
-                break;
-            case RESULT_ROT_YAW:
-                mPreviewHolder.stopAnimation();
-                mPreviewHolder.setStatus(
-                        mPreviewHolder.isXEnabled(), mPreviewHolder.isYEnabled(),
-                        mPreviewHolder.isZEnabled(), enabled
-                );
-                mPreviewHolder.startAnimation();
-                break;
+                mMap[id] = PreviewHolder.NO_ANIMATOR;
+            }
+        } else {
+            // Selected some animator. Should check if someone else had it, and unbind them.
+            for (int i = 0; i < mMap.length; i++) {
+                int theirAnimator = mMap[i];
+                if (theirAnimator == animator) {
+                    // They had this one
+                    ResultHolder them = mHolders[i];
+                    // Update their spinner and PREVENT RECURSION
+                    them.setSelectedAnimator(PreviewHolder.NO_ANIMATOR);
+                    mMap[i] = PreviewHolder.NO_ANIMATOR;
+                    // Since only one result can be mapped to an animator, no need to iterate more
+                    break;
+                }
+            }
+            // Did we have an animator we need to unbind?
+            int ourPrevAnimator = mMap[id];
+            if (ourPrevAnimator != PreviewHolder.NO_ANIMATOR) {
+                mPreviewHolder.setEnabled(ourPrevAnimator, false);
+            }
+
+            // Now we bind there
+            ResultHolder us = mHolders[id];
+            mPreviewHolder.setInterpolator(animator, us.getInterpolator(), us.getMagnitude());
+            mPreviewHolder.stopAnimation();
+            mPreviewHolder.setEnabled(animator, us.isEnabled());
+            mPreviewHolder.startAnimation();
+            // And don't forget to remember that
+            mMap[id] = animator;
         }
     }
 
@@ -277,6 +293,12 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
          * @return reference to the array, editable
          */
         boolean[] getResultHoldersState();
+
+        /**
+         * Get reference to the array that maps holders to animators in preview
+         * @return
+         */
+        int[] getHolderToAnimatorMap();
     }
 
 }

@@ -58,15 +58,17 @@
             android:id="@+id/range_holder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
         <CheckBox
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textSize="16sp"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="16dp"
+                android:saveEnabled="false"
                 android:text="@string/align_start_end"/>
 
         <Space
@@ -77,7 +79,8 @@
         <Spinner
                 android:id="@+id/preview_as"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:saveEnabled="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:entries="@array/preview_options"/>
 

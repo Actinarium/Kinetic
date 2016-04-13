@@ -13,12 +13,14 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
     private static final String ARG_GYRO = "com.actinarium.kinetic.bundle.GYRO";
     private static final String ARG_RV = "com.actinarium.kinetic.bundle.RV";
     private static final String ARG_RHS = "com.actinarium.kinetic.bundle.RHS";
+    private static final String ARG_HAM = "com.actinarium.kinetic.bundle.HAM";
 
     private DataSet3 mAccelData;
     private DataSet3 mGyroData;
     private DataSet4 mRotVectorData;
 
     private boolean[] mResultHoldersState;
+    private int[] mHolderToAnimatorMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +32,14 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
             mGyroData = savedInstanceState.getParcelable(ARG_GYRO);
             mRotVectorData = savedInstanceState.getParcelable(ARG_RV);
             mResultHoldersState = savedInstanceState.getBooleanArray(ARG_RHS);
+            mHolderToAnimatorMap = savedInstanceState.getIntArray(ARG_HAM);
             return;
         } else {
             mResultHoldersState = new boolean[]{true, true, true, true, true, true};
+            mHolderToAnimatorMap = new int[]{
+                    PreviewHolder.ANIMATOR_X, PreviewHolder.ANIMATOR_Y, PreviewHolder.NO_ANIMATOR,
+                    PreviewHolder.NO_ANIMATOR, PreviewHolder.NO_ANIMATOR, PreviewHolder.ANIMATOR_ROTATION,
+            };
         }
 
         getSupportFragmentManager()
@@ -76,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
     }
 
     @Override
+    public int[] getHolderToAnimatorMap() {
+        return mHolderToAnimatorMap;
+    }
+
+    @Override
     public void onBackPressed() {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(ResultsFragment.TAG);
         if (fragment instanceof ResultsFragment) {
@@ -92,5 +104,6 @@ public class MainActivity extends AppCompatActivity implements RecordFragment.Ho
         outState.putParcelable(ARG_GYRO, mGyroData);
         outState.putParcelable(ARG_RV, mRotVectorData);
         outState.putBooleanArray(ARG_RHS, mResultHoldersState);
+        outState.putIntArray(ARG_HAM, mHolderToAnimatorMap);
     }
 }

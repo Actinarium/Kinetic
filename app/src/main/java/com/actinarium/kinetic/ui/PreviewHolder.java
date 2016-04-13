@@ -2,10 +2,9 @@ package com.actinarium.kinetic.ui;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Interpolator;
-import com.actinarium.kinetic.util.DataSet3;
 
 /**
  * A presenter for preview animation
@@ -14,103 +13,72 @@ import com.actinarium.kinetic.util.DataSet3;
  */
 public class PreviewHolder {
 
+    private static final String TAG = "PreviewHolder";
+
+    public static final int NO_ANIMATOR = -1;
+    public static final int ANIMATOR_X = 0;
+    public static final int ANIMATOR_Y = 1;
+    public static final int ANIMATOR_ROTATION = 2;
 
     private final View mAnimatedView;
-    private final DataSet3 mAccelData;
-    private final DataSet3 mGyroData;
 
-    private final ObjectAnimator mAnimX;
-    private final ObjectAnimator mAnimY;
-    private final ObjectAnimator mAnimZ;
-    private final ObjectAnimator mAnimRotation;
+    private final ObjectAnimator[] mAnimators = new ObjectAnimator[3];
+    private final boolean[] mEnabled = new boolean[3];
 
-    private boolean mXEnabled = true;
-    private boolean mYEnabled = true;
-    private boolean mZEnabled = true;
-    private boolean mRotationEnabled = true;
-
-    public PreviewHolder(View animatedView, DataSet3 accelData, DataSet3 gyroData,
-                         float linearMagnitude, float elevationMagnitude, float angularMagnitude) {
+    public PreviewHolder(View animatedView) {
         mAnimatedView = animatedView;
-        mAccelData = accelData;
-        mGyroData = gyroData;
 
-        mAnimX = ObjectAnimator.ofFloat(animatedView, "translationX", 0, linearMagnitude);
-        mAnimX.setRepeatCount(ValueAnimator.INFINITE);
-        mAnimY = ObjectAnimator.ofFloat(animatedView, "translationY", 0, -linearMagnitude);
-        mAnimY.setRepeatCount(ValueAnimator.INFINITE);
-        mAnimZ = ObjectAnimator.ofFloat(animatedView, "translationZ", 0, elevationMagnitude);
-        mAnimZ.setRepeatCount(ValueAnimator.INFINITE);
-        mAnimRotation = ObjectAnimator.ofFloat(animatedView, "rotation", 0, -angularMagnitude);
-        mAnimRotation.setRepeatCount(ValueAnimator.INFINITE);
+        mAnimators[ANIMATOR_X] = ObjectAnimator.ofFloat(animatedView, "translationX", 0f);
+        mAnimators[ANIMATOR_X].setRepeatCount(ValueAnimator.INFINITE);
+        mAnimators[ANIMATOR_Y] = ObjectAnimator.ofFloat(animatedView, "translationY", 0f);
+        mAnimators[ANIMATOR_Y].setRepeatCount(ValueAnimator.INFINITE);
+        mAnimators[ANIMATOR_ROTATION] = ObjectAnimator.ofFloat(animatedView, "rotation", 0f);
+        mAnimators[ANIMATOR_ROTATION].setRepeatCount(ValueAnimator.INFINITE);
     }
 
     public void setDuration(long durationMs) {
-        mAnimX.setDuration(durationMs);
-        mAnimY.setDuration(durationMs);
-        mAnimZ.setDuration(durationMs);
-        mAnimRotation.setDuration(durationMs);
+        for (ObjectAnimator animator : mAnimators) {
+            animator.setDuration(durationMs);
+        }
     }
 
     public void startAnimation() {
-        if (mXEnabled) {
-            mAnimX.start();
+        Log.d(TAG, "startAnimation: called");
+        if (mEnabled[ANIMATOR_X]) {
+            mAnimators[ANIMATOR_X].start();
         } else {
             mAnimatedView.setTranslationX(0f);
         }
-        if (mYEnabled) {
-            mAnimY.start();
+        if (mEnabled[ANIMATOR_Y]) {
+            mAnimators[ANIMATOR_Y].start();
         } else {
             mAnimatedView.setTranslationY(0f);
         }
-        if (mZEnabled) {
-            mAnimZ.start();
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mAnimatedView.setTranslationZ(0f);
-            }
-        }
-        if (mRotationEnabled) {
-            mAnimRotation.start();
+        if (mEnabled[ANIMATOR_ROTATION]) {
+            mAnimators[ANIMATOR_ROTATION].start();
         } else {
             mAnimatedView.setRotation(0f);
         }
     }
 
     public void stopAnimation() {
-        mAnimX.cancel();
-        mAnimY.cancel();
-        mAnimZ.cancel();
-        mAnimRotation.cancel();
+        Log.d(TAG, "stopAnimation: called");
+        for (ObjectAnimator animator : mAnimators) {
+            animator.cancel();
+        }
     }
 
-    public void setStatus(boolean xEnabled, boolean yEnabled, boolean zEnabled, boolean rotationEnabled) {
-        mXEnabled = xEnabled;
-        mYEnabled = yEnabled;
-        mZEnabled = zEnabled;
-        mRotationEnabled = rotationEnabled;
+    public void setEnabled(int animator, boolean isEnabled) {
+        mEnabled[animator] = isEnabled;
     }
 
-    public void setInterpolators(Interpolator x, Interpolator y, Interpolator z, Interpolator rot) {
-        mAnimX.setInterpolator(x);
-        mAnimY.setInterpolator(y);
-        mAnimZ.setInterpolator(z);
-        mAnimRotation.setInterpolator(rot);
+    public boolean isEnabled(int animator) {
+        return mEnabled[animator];
     }
 
-    public boolean isRotationEnabled() {
-        return mRotationEnabled;
-    }
-
-    public boolean isZEnabled() {
-        return mZEnabled;
-    }
-
-    public boolean isYEnabled() {
-        return mYEnabled;
-    }
-
-    public boolean isXEnabled() {
-        return mXEnabled;
+    public void setInterpolator(int animator, Interpolator interpolator, float magnitude) {
+        mAnimators[animator].setInterpolator(interpolator);
+        // Y and rotation are in the opposite direction of recorded data
+        mAnimators[animator].setFloatValues(0f, animator == ANIMATOR_X ? magnitude : -magnitude);
     }
 }
