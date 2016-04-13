@@ -12,8 +12,8 @@
 
         <View
                 android:id="@+id/preview_sprite"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:background="@color/colorAccent"
                 android:elevation="@dimen/elevation_magnitude"
                 android:layout_gravity="center"/>

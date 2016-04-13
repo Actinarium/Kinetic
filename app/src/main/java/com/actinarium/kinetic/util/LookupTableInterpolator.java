@@ -15,21 +15,44 @@ public class LookupTableInterpolator implements Interpolator {
     private float[] mValues;
     private float mStepSize;
     private int mLengthMinusOne;
-    private float mValueAdd;
-    private float mValueMult;
+    private float mValueAdd = 0f;
+    private float mValueMult = 1f;
+    private int mStart;
 
     /**
-     * Create a new interpolator for a given set of values
+     * Create a new table lookup interpolator for arbitrary sensor data
+     */
+    public LookupTableInterpolator() {
+    }
+
+    /**
+     * Set lookup table data
      *
      * @param values   Raw values for the lookup table, recorded at fixed time step
+     */
+    public void setData(float[] values) {
+        mValues = values;
+    }
+
+    /**
+     * Set lookup table range
+     *
      * @param start    Index of the first value of the array to use, inclusively
      * @param end      Index of the last value of the array to use, inclusively
-     * @param valueAdd Used to convert
      */
-    public LookupTableInterpolator(float[] values, int start, int end, float valueAdd, float valueMult) {
-        mValues = values;
+    public void setRange(int start, int end) {
+        mStart = start;
         mLengthMinusOne = end - start - 2;
         mStepSize = 1f / mLengthMinusOne;
+    }
+
+    /**
+     * Set extra and a multiplier to adjust how raw table data maps to 0f-1f range and beyond
+     *
+     * @param valueAdd  Extra, added after multiplication
+     * @param valueMult Multiplier, used to pre-multiply values
+     */
+    public void setTransformation(float valueAdd, float valueMult) {
         mValueAdd = valueAdd;
         mValueMult = valueMult;
     }
@@ -53,7 +76,7 @@ public class LookupTableInterpolator implements Interpolator {
         float weight = diff / mStepSize;
 
         // Linearly interpolate between the table values
-        float value = mValues[index];
-        return mValueAdd + (value + weight * (mValues[index + 1] - value)) * mValueMult;
+        float value = mValues[index + mStart];
+        return mValueAdd + (value + weight * (mValues[index + mStart + 1] - value)) * mValueMult;
     }
 }

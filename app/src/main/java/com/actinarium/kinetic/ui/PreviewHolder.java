@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Build;
 import android.view.View;
+import android.view.animation.Interpolator;
 import com.actinarium.kinetic.util.DataSet3;
 
 /**
@@ -36,11 +37,11 @@ public class PreviewHolder {
 
         mAnimX = ObjectAnimator.ofFloat(animatedView, "translationX", 0, linearMagnitude);
         mAnimX.setRepeatCount(ValueAnimator.INFINITE);
-        mAnimY = ObjectAnimator.ofFloat(animatedView, "translationY", 0, linearMagnitude);
+        mAnimY = ObjectAnimator.ofFloat(animatedView, "translationY", 0, -linearMagnitude);
         mAnimY.setRepeatCount(ValueAnimator.INFINITE);
         mAnimZ = ObjectAnimator.ofFloat(animatedView, "translationZ", 0, elevationMagnitude);
         mAnimZ.setRepeatCount(ValueAnimator.INFINITE);
-        mAnimRotation = ObjectAnimator.ofFloat(animatedView, "rotation", 0, angularMagnitude);
+        mAnimRotation = ObjectAnimator.ofFloat(animatedView, "rotation", 0, -angularMagnitude);
         mAnimRotation.setRepeatCount(ValueAnimator.INFINITE);
     }
 
@@ -88,6 +89,13 @@ public class PreviewHolder {
         mYEnabled = yEnabled;
         mZEnabled = zEnabled;
         mRotationEnabled = rotationEnabled;
+    }
+
+    public void setInterpolators(Interpolator x, Interpolator y, Interpolator z, Interpolator rot) {
+        mAnimX.setInterpolator(x);
+        mAnimY.setInterpolator(y);
+        mAnimZ.setInterpolator(z);
+        mAnimRotation.setInterpolator(rot);
     }
 
     public boolean isRotationEnabled() {

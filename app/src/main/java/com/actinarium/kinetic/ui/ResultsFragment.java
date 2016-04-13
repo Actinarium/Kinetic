@@ -103,19 +103,26 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
         });
         resultsContainer.addView(export);
 
-        fillChartsData();
+        setData();
         mPreviewHolder.startAnimation();
 
         return view;
     }
 
-    private void fillChartsData() {
-        mHolders[0].plotData(mAccelData.times, mAccelData.valuesX, mAccelData.length);
-        mHolders[1].plotData(mAccelData.times, mAccelData.valuesY, mAccelData.length);
-        mHolders[2].plotData(mAccelData.times, mAccelData.valuesZ, mAccelData.length);
-        mHolders[3].plotData(mGyroData.times, mGyroData.valuesX, mGyroData.length);
-        mHolders[4].plotData(mGyroData.times, mGyroData.valuesY, mGyroData.length);
-        mHolders[5].plotData(mGyroData.times, mGyroData.valuesZ, mGyroData.length);
+    private void setData() {
+        mHolders[0].setData(mAccelData.times, mAccelData.valuesX, mAccelData.length);
+        mHolders[1].setData(mAccelData.times, mAccelData.valuesY, mAccelData.length);
+        mHolders[2].setData(mAccelData.times, mAccelData.valuesZ, mAccelData.length);
+        mHolders[3].setData(mGyroData.times, mGyroData.valuesX, mGyroData.length);
+        mHolders[4].setData(mGyroData.times, mGyroData.valuesY, mGyroData.length);
+        mHolders[5].setData(mGyroData.times, mGyroData.valuesZ, mGyroData.length);
+
+        mPreviewHolder.setInterpolators(
+                mHolders[0].getInterpolator(),
+                mHolders[1].getInterpolator(),
+                mHolders[2].getInterpolator(),
+                mHolders[5].getInterpolator()
+        );
     }
 
     /**

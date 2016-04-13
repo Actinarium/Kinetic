@@ -6,9 +6,10 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import com.actinarium.kinetic.R;
+import com.actinarium.kinetic.util.LookupTableInterpolator;
 
 /**
- * A holder for a single result entry (title, chart, output range etc)
+ * A holder for a single result entry (title, chart, output range etc). Also holds an interpolator for animation
  *
  * @author Paul Danyliuk
  */
@@ -25,6 +26,8 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
     private final KineticChart mChart;
     private final SeekBar mRangeZero;
     private final SeekBar mRangeOne;
+    private final LookupTableInterpolator mInterpolator;
+    private int mLength;
 
     /**
      * Create a holder for a single result row and wire up interactivity
@@ -66,13 +69,16 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
 
         mRangeZero.setOnSeekBarChangeListener(this);
         mRangeOne.setOnSeekBarChangeListener(this);
+
+        mInterpolator = new LookupTableInterpolator();
     }
 
-    public void plotData(long[] times, float[] values, int length) {
-        float min = mIsRotation ? -1f : -0.1f;
-        float max = mIsRotation ? 1f : 0.1f;
-//        float min = -1f;
-//        float max = 1f;
+    public void setData(long[] times, float[] values, int length) {
+        mLength = length;
+
+        // Calculate real min and max
+        float min = values[0];
+        float max = values[0];
         for (int i = 1; i < length; i++) {
             if (values[i] < min) {
                 min = values[i];
@@ -81,11 +87,31 @@ public class ResultHolder implements SeekBar.OnSeekBarChangeListener {
             }
         }
 
+        if (mIsRotation) {
+            // Now, if that's rotation values, I want to make them a multiple of pi/2 for easier application
+            min = (float) (Math.floor(min / Math.PI * 2.0) * Math.PI / 2);
+            max = (float) (Math.ceil(max / Math.PI * 2.0) * Math.PI / 2);
+        } else {
+            // Or if it's offset values, I want to make the minimum range of -5cm..5cm
+            min = Math.min(min, -0.05f);
+            max = Math.max(max, 0.05f);
+        }
+
+        mInterpolator.setData(values);
+        mInterpolator.setRange(0, mLength - 1);
+        mInterpolator.setTransformation(0f, 1 / (max - min));
         mChart.setData(times, values, length, min, max);
     }
 
     public void setTrim(float trimStart, float trimEnd) {
+        final int start = (int) (mLength * trimStart);
+        final int end = (int) (mLength * (1 - trimEnd) + 0.5);
+        mInterpolator.setRange(start, end);
         mChart.setTrim(trimStart, trimEnd);
+    }
+
+    public LookupTableInterpolator getInterpolator() {
+        return mInterpolator;
     }
 
     @Override

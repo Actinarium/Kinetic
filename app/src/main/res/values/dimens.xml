@@ -7,6 +7,6 @@
     <dimen name="chart_axis_thickness">1.5dp</dimen>
     <dimen name="chart_height">120dp</dimen>
     <dimen name="preview_height">200dp</dimen>
-    <dimen name="linear_magnitude">50dp</dimen>
+    <dimen name="linear_magnitude">75dp</dimen>
     <dimen name="elevation_magnitude">4dp</dimen>
 </resources>
