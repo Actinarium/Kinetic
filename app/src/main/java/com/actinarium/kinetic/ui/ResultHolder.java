@@ -18,13 +18,12 @@ public class ResultHolder {
     private final Host mHost;
 
     private final boolean mIsRotation;
-    private boolean mIsRangeZeroModified;
-    private boolean mIsRangeOneModified;
 
     private final Switch mToggle;
     private final KineticChart mChart;
     private final LookupTableInterpolator mInterpolator;
     private int mLength;
+    private final String mTitle;
 
     /**
      * Create a holder for a single result row and wire up interactivity
@@ -38,6 +37,7 @@ public class ResultHolder {
     public ResultHolder(int id, Host host, View rootView, String title, boolean isRotation) {
         mId = id;
         mHost = host;
+        mTitle = title;
         mIsRotation = isRotation;
 
         TextView titleLabel = (TextView) rootView.findViewById(R.id.title);
@@ -104,6 +104,14 @@ public class ResultHolder {
 
     public LookupTableInterpolator getInterpolator() {
         return mInterpolator;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public boolean isEnabled() {
+        return mToggle.isChecked();
     }
 
     public interface Host {

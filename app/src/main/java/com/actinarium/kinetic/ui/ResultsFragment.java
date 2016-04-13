@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,11 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Toast;
 import com.actinarium.kinetic.R;
+import com.actinarium.kinetic.pipeline.CodeGenerator;
 import com.actinarium.kinetic.util.DataSet3;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * A fragment that displays recording result. Just like record fragment, implements a listener for the seek bars right
@@ -43,6 +48,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     private int mEndProgress;
     private int mMax;
     private long mFullDuration;
+    private String[] mEpithets;
 
     public ResultsFragment() {
         // Required empty public constructor
@@ -102,6 +108,7 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
             }
         });
         resultsContainer.addView(export);
+        mEpithets = getResources().getStringArray(R.array.epithets);
 
         setData();
         mPreviewHolder.startAnimation();
@@ -147,7 +154,42 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
     }
 
     private void onExport() {
-        Toast.makeText(getContext(), "Export clicked!", Toast.LENGTH_SHORT).show();
+        // Allocate string builder large enough
+        StringBuilder exportBuilder = new StringBuilder(4096);
+
+        // Remember the random names we already have in this export to avoid duplication
+        ArrayList<Integer> usedInts = new ArrayList<>(6);
+        Random random = new Random();
+
+        for (ResultHolder holder : mHolders) {
+            if (holder.isEnabled()) {
+                // Pick a name
+                int index;
+                do {
+                    index = random.nextInt(mEpithets.length);
+                } while (usedInts.contains(index));
+                usedInts.add(index);
+
+                // Generate code and append to the builder
+                exportBuilder.append(CodeGenerator.generateInterpolatorCode(
+                        CodeGenerator.DEFAULT_PACKAGE_NAME,
+                        getString(R.string.class_name_template, mEpithets[index]),
+                        holder.getTitle(),
+                        holder.getInterpolator().exportData()
+                )).append("\n\n");
+            }
+        }
+
+        if (exportBuilder.length() == 0) {
+            Toast.makeText(getContext(), R.string.nothing_to_export, Toast.LENGTH_LONG).show();
+        } else {
+            // Share this to any app that can handle raw text (e.g. a mail app to send generated code to myself)
+            ShareCompat.IntentBuilder.from(getActivity())
+                    .setChooserTitle(R.string.export_to)
+                    .setType("text/plain")
+                    .setText(exportBuilder.toString())
+                    .startChooser();
+        }
     }
 
     @Override
@@ -223,7 +265,9 @@ public class ResultsFragment extends Fragment implements SeekBar.OnSeekBarChange
 
     public interface Host {
         DataSet3 getAccelData();
+
         DataSet3 getGyroData();
+
         void onRecordingDiscarded();
     }
 

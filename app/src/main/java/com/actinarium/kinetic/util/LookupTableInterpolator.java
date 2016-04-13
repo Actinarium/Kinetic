@@ -1,6 +1,7 @@
 package com.actinarium.kinetic.util;
 
 import android.view.animation.Interpolator;
+import com.actinarium.kinetic.pipeline.CodeGenerator;
 
 /**
  * <p>An interpolator that uses a lookup table to compute interpolation.</p><p><b>Note:</b> it is assumed that values
@@ -28,7 +29,7 @@ public class LookupTableInterpolator implements Interpolator {
     /**
      * Set lookup table data
      *
-     * @param values   Raw values for the lookup table, recorded at fixed time step
+     * @param values Raw values for the lookup table, recorded at fixed time step
      */
     public void setData(float[] values) {
         mValues = values;
@@ -37,8 +38,8 @@ public class LookupTableInterpolator implements Interpolator {
     /**
      * Set lookup table range
      *
-     * @param start    Index of the first value of the array to use, inclusively
-     * @param end      Index of the last value of the array to use, inclusively
+     * @param start Index of the first value of the array to use, inclusively
+     * @param end   Index of the last value of the array to use, inclusively
      */
     public void setRange(int start, int end) {
         mStart = start;
@@ -78,5 +79,20 @@ public class LookupTableInterpolator implements Interpolator {
         // Linearly interpolate between the table values
         float value = mValues[index + mStart];
         return mValueAdd + (value + weight * (mValues[index + mStart + 1] - value)) * mValueMult;
+    }
+
+    /**
+     * Exports data from selected range, applying extra and multiplier to all copied values
+     *
+     * @return A new array of normalized values from selected range, ready to pass to {@link
+     * CodeGenerator#generateInterpolatorCode(String, String, float[])}
+     */
+    public float[] exportData() {
+        final int exportLength = mLengthMinusOne + 1;
+        float[] result = new float[exportLength];
+        for (int i = 0; i < exportLength; i++) {
+            result[i] = mValueAdd + mValues[mStart + i] * mValueMult;
+        }
+        return result;
     }
 }

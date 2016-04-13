@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Kinetic</string>
     <string name="app_subtitle">A proof of concept\nfor authentic motion recorder</string>
 
@@ -33,4 +33,21 @@
     <string name="keep_editing">Keep editing</string>
 
     <string name="export">Export</string>
+    <string name="class_name_template">My<xliff:g id="epithet" example="Incredible">%s</xliff:g>Interpolator</string>
+    <string-array name="epithets">
+        <item>Incredible</item>
+        <item>Amazing</item>
+        <item>Wonderful</item>
+        <item>Glorious</item>
+        <item>Awesome</item>
+        <item>Radical</item>
+        <item>Marvellous</item>
+        <item>Stunning</item>
+        <item>Spectacular</item>
+        <item>Astonishing</item>
+        <item>Impressive</item>
+        <item>Tremendous</item>
+    </string-array>
+    <string name="nothing_to_export">Nothing to export: all results are switched off</string>
+    <string name="export_to">Export generated code to</string>
 </resources>
